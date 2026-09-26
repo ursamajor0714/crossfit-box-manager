@@ -1,0 +1,333 @@
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;font-size:14px}
+.header{background:#fff;border-bottom:1px solid #e5e5e5;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.header-title{font-size:16px;font-weight:600}
+.header-sub{font-size:12px;color:#888;margin-top:1px}
+.add-btn{background:#1a1a1a;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
+.nav{background:#fff;border-bottom:1px solid #e5e5e5;padding:0 24px;display:flex}
+.nav-btn{padding:12px 16px;font-size:13px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:#888;font-weight:500}
+.nav-btn.active{color:#1a1a1a;border-bottom-color:#1a1a1a}
+.content{padding:24px;max-width:1200px;margin:0 auto}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.metric{background:#fff;border-radius:12px;padding:16px;border:1px solid #e5e5e5}
+.metric-label{font-size:12px;color:#888;margin-bottom:8px}
+.metric-value{font-size:26px;font-weight:600}
+.metric-sub{font-size:11px;color:#aaa;margin-top:4px}
+.section-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:#fff;border-radius:12px;padding:20px;border:1px solid #e5e5e5;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;margin-bottom:16px}
+.page{display:none}.page.active{display:block}
+.sub-tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid #e5e5e5}
+.sub-tab{padding:10px 16px;font-size:13px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:#888;font-weight:500;margin-bottom:-1px}
+.sub-tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a}
+.sub-tab:disabled{color:#ccc;cursor:not-allowed}
+.sub-page{display:none}.sub-page.active{display:block}
+.search-row{display:flex;gap:8px;margin-bottom:16px}
+.search-row input,.search-row select{padding:8px 12px;border:1px solid #e5e5e5;border-radius:8px;font-size:13px;outline:none;background:#fff}
+.search-row input{flex:1}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;color:#888;font-weight:500;border-bottom:1px solid #f0f0f0;font-size:12px}
+td{padding:10px 12px;border-bottom:1px solid #f5f5f5}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-active{background:#e8f5e9;color:#2e7d32}
+.badge-expire{background:#fff8e1;color:#e65100}
+.badge-overdue{background:#ffebee;color:#c62828}
+.badge-done{background:#f5f5f5;color:#757575}
+.badge-assign{background:#e3f2fd;color:#1565c0}
+.badge-return{background:#fce4ec;color:#880e4f}
+.locker-wrap{overflow-x:auto}
+.locker-grid{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;min-width:600px;margin-bottom:12px}
+.locker{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;cursor:pointer;border:1px solid #e5e5e5;transition:opacity .15s}
+.locker:hover{opacity:.8}
+.locker-empty{background:#f5f5f5;color:#bbb}
+.locker-active{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7}
+.locker-staff{background:#e3f2fd;color:#1565c0;border-color:#90caf9}
+.locker-info{font-size:13px;color:#888;text-align:center;padding:8px 0}
+.locker-legend{display:flex;gap:16px;font-size:12px;color:#888}
+.legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle}
+.alert-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f5}
+.alert-row:last-child{border-bottom:none}
+.alert-name{font-size:14px;font-weight:500;flex:1}
+.alert-date{font-size:11px;color:#aaa;margin-top:2px}
+.days-red{color:#c62828;font-weight:600;font-size:13px}
+.days-amber{color:#e65100;font-weight:600;font-size:13px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:12px;color:#888;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:1px solid #e5e5e5;border-radius:8px;font-size:13px;outline:none;background:#fff;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#1a1a1a}
+.form-full{grid-column:1/-1}
+.price-display{font-size:24px;font-weight:600;padding:8px 0}
+.submit-btn{width:100%;padding:12px;font-size:14px;font-weight:600;background:#1a1a1a;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:12px}
+.submit-btn:hover{background:#333}
+.tabs-inline{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.tab-sm{padding:6px 14px;font-size:12px;background:none;border:1px solid #e5e5e5;border-radius:20px;cursor:pointer;color:#888;font-weight:500}
+.tab-sm.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.action-btn{padding:5px 10px;font-size:12px;border:1px solid #e5e5e5;border-radius:6px;cursor:pointer;background:#fff;color:#555}
+.action-btn:hover{background:#f5f5f5}
+.action-btn.danger{color:#c62828;border-color:#ffcdd2}
+.action-btn.danger:hover{background:#ffebee}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:24px;width:660px;max-width:90vw;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#888}
+/* 회원 상세는 등록 이력 표(10열)가 들어가므로 다른 모달보다 넓게. 화면이 좁으면 화면에 맞춰 줄어든다. */
+#member-modal .modal{width:min(1120px, 96vw);max-width:none}
+/* 탭도 헤더 바로 아래에 붙여 스크롤해도 계속 보이게.
+   sticky 기준점이 모달 패딩(24px)만큼 아래라, 고정 헤더 높이(61px)에서 그만큼 뺀 값을 준다.
+   본문이 뒤로 지나가므로 배경을 깔고, 음수 마진으로 모달 좌우 패딩까지 덮는다. */
+#member-modal .tabs-inline{
+  position:sticky;top:37px;z-index:2;background:#fff;
+  margin:0 -24px 16px;padding:2px 24px 12px;
+}
+/* 표는 모달 안에서 가로로만 스크롤 — 열이 세로로 쪼개지지 않게 한다 */
+#member-modal .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#member-modal .table-scroll table{min-width:100%;width:max-content}
+#member-modal .table-scroll th{white-space:nowrap}
+#member-modal .table-scroll td{white-space:nowrap;vertical-align:top}
+/* 메모 열만 줄바꿈 허용 (내용이 길어서) */
+#member-modal .table-scroll td.memo-cell{white-space:pre-wrap;min-width:200px;max-width:320px}
+
+/* 회원 상세는 내용이 길어 스크롤되므로, 닫기(X)가 항상 보이도록 헤더를 상단에 고정.
+   음수 마진으로 .modal의 24px 패딩까지 덮어 배경이 좌우 끝까지 깔리게 한다. */
+/* sticky 오프셋은 "마진 박스" 기준이라, top:0을 주면 음수 마진(-24px)만큼 위에 빈 띠가 생겨
+   그 사이로 본문이 비쳐 보인다. 마진과 같은 값으로 당겨 테두리 박스를 스크롤 맨 위에 붙인다. */
+#member-modal .modal-title{
+  position:sticky;top:-24px;z-index:3;background:#fff;
+  margin:-24px -24px 16px;padding:24px 24px 12px;
+  border-radius:16px 16px 0 0;border-bottom:1px solid #eee;
+}
+/* 메모 입력 — 여러 줄을 편하게 적도록 카드 형태로 */
+.memo-box{width:100%;background:#fffdf5;border:1px solid #f0e6c8;border-radius:10px;padding:12px 14px;
+  font-size:13px;line-height:1.7;color:#5c4a1a;resize:vertical;min-height:88px;font-family:inherit;box-sizing:border-box}
+.memo-box:focus{outline:none;border-color:#e0c97a;background:#fffcf0}
+.memo-box::placeholder{color:#c4b48a}
+/* 메모 표시 — 줄바꿈을 살려서 그대로 보여주는 카드 */
+.memo-card{background:#fffdf5;border:1px solid #f0e6c8;border-radius:10px;padding:12px 14px;
+  font-size:13px;line-height:1.7;color:#5c4a1a;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow-y:auto}
+.memo-card.empty{background:#fafafa;border-color:#eee;color:#bbb;font-style:normal}
+.memo-card-label{font-size:12px;color:#888;margin-bottom:6px}
+.empty-state{text-align:center;padding:40px;color:#aaa;font-size:13px}
+.detail-notice{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;font-size:12px;color:#92400e;margin-bottom:16px;line-height:1.6}
+.section-box{border:1px solid #e5e5e5;border-radius:10px;padding:16px;margin-top:16px}
+.section-box-title{font-size:12px;font-weight:600;color:#555;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+.phone-mockup{width:220px;margin:0 auto;background:#2b2b2b;border-radius:28px;padding:14px 10px;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.phone-speaker{width:50px;height:5px;border-radius:3px;background:#555;margin:0 auto 10px}
+.phone-screen{background:#cfe8cf;border-radius:8px;min-height:180px;padding:12px;display:flex;align-items:flex-start}
+.phone-bubble{background:#fff;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5;color:#1a1a1a;white-space:pre-wrap;word-break:break-word;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.toggle-check{width:16px;height:16px;cursor:pointer}
+.history-action-assign{color:#1565c0;font-weight:500}
+.history-action-return{color:#880e4f;font-weight:500}
+/* ───────── 모바일 반응형 (폰) ───────── */
+@media (max-width: 768px) {
+  body { font-size: 15px; overflow-x: hidden; }
+
+  /* 헤더 */
+  .header { padding: 0 14px; height: auto; min-height: 52px; flex-wrap: wrap; gap: 8px; }
+  .header-title { font-size: 15px; }
+  .add-btn { padding: 7px 12px; font-size: 12px; }
+
+  /* 네비게이션 - 가로 스크롤 */
+  .nav { padding: 0 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn { padding: 12px 12px; font-size: 13px; flex-shrink: 0; }
+
+  /* 콘텐츠 여백 줄임 */
+  .content { padding: 14px; }
+  .card { padding: 14px; border-radius: 10px; }
+
+  /* 지표 카드 - 2열 */
+  .metric-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .metric-value { font-size: 22px; }
+
+  /* 2단 섹션 - 1열로 */
+  .section-two { grid-template-columns: 1fr; }
+
+  /* 폼 - 1열로 */
+  .form-grid { grid-template-columns: 1fr; gap: 12px; }
+  .modal { width: 100%; max-width: 100%; padding: 18px; border-radius: 14px; max-height: 90vh; }
+  /* 모바일은 .modal 패딩이 18px이라 고정 헤더의 음수 마진도 맞춰준다 */
+  #member-modal .modal-title { top: -18px; margin: -18px -18px 14px; padding: 18px 18px 10px; border-radius: 14px 14px 0 0; }
+  /* 모바일은 패딩이 18px이라 고정 헤더의 아래 끝도 그만큼 위로 올라온다 */
+  #member-modal .tabs-inline { top: 35px; margin: 0 -18px 14px; padding: 2px 18px 10px; }
+
+  /* 검색줄 - 세로 쌓기 */
+  .search-row { flex-direction: column; }
+  .search-row select { width: 100%; }
+
+  /* 표 - 가로 스크롤 */
+  table { font-size: 13px; }
+  .card > table,
+  .sub-page table,
+  #page-members table,
+  #page-uniform table,
+  #page-counts table,
+  #page-pricing table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 8px 10px; }
+
+  /* 락커 그리드 - 칸 줄이기 */
+  .locker-grid { grid-template-columns: repeat(10, 1fr); min-width: 0; }
+  .locker { font-size: 10px; }
+
+  /* 버튼 터치 영역 */
+  .action-btn { padding: 7px 12px; font-size: 13px; }
+  .tab-sm { padding: 7px 14px; font-size: 13px; }
+
+  /* 매출 그래프 - 가로 스크롤로 넘침 방지 */
+
+  /* 입력 필드 폰트 16px (iOS 줌 방지) */
+  input, select, textarea { font-size: 16px !important; }
+}
+
+@media (max-width: 420px) {
+  .metric-grid { grid-template-columns: 1fr 1fr; }
+  .locker-grid { grid-template-columns: repeat(8, 1fr); }
+  .header-title { font-size: 14px; }
+}
+
+/* ── 가계부 ─────────────────────────────────────────── */
+.ledger-summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.ledger-card { flex: 1; min-width: 130px; background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 12px 14px; }
+.ledger-card-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+.ledger-card-value { font-size: 18px; font-weight: 700; }
+
+.ledger-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.ledger-col { border: 1px solid #eee; border-radius: 10px; overflow: hidden; }
+.ledger-col-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 13px; font-weight: 600; }
+.ledger-col-head--in { background: #f1f8f2; color: #2e7d32; }
+.ledger-col-head--out { background: #fdf1f1; color: #c62828; }
+.ledger-col table { width: 100%; }
+.ledger-tag { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 8px; font-size: 10px; background: #eef2ff; color: #4054b2; }
+.ledger-del { border: 1px solid #eee; background: #fff; color: #999; font-size: 11px; line-height: 1; cursor: pointer; padding: 4px 7px; border-radius: 5px; white-space: nowrap; }
+.ledger-del:hover { border-color: #c62828; color: #c62828; }
+/* 매출 덩어리 줄 — 누르면 내역 팝업이 뜬다. 호버 배경은 위쪽 tr:hover td 가 이미 준다 */
+.ledger-group-row { cursor: pointer; }
+
+/* 기간 선택 달력 */
+.ledger-period { position: relative; }
+.ledger-period-btn { padding: 6px 12px; border: 1px solid #e5e5e5; border-radius: 6px; background: #fff; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.ledger-period-btn:hover { border-color: #1a1a1a; }
+.ledger-cal[hidden] { display: none; }
+.ledger-cal {
+  position: absolute; z-index: 30; top: calc(100% + 6px); right: 0; width: 262px; padding: 12px;
+  background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+.ledger-cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
+.ledger-cal-head button { border: none; background: none; font-size: 20px; line-height: 1; color: #666; cursor: pointer; padding: 0 10px; }
+.ledger-cal-head button:hover { color: #1a1a1a; }
+.ledger-cal-dow, .ledger-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.ledger-cal-dow { margin-bottom: 4px; font-size: 11px; color: #aaa; text-align: center; }
+.ledger-cal-day { border: none; background: none; border-radius: 6px; padding: 7px 0; font-size: 12px; color: #333; cursor: pointer; }
+.ledger-cal-day:hover { background: #f2f2f2; }
+.ledger-cal-day.is-today { color: #2e7d32; font-weight: 700; }
+.ledger-cal-day.is-picked { background: #2e7d32; color: #fff; font-weight: 600; }
+.ledger-cal-foot { display: flex; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+.ledger-cal-ghost { flex: 1; padding: 7px 0; border: 1px solid #e5e5e5; background: #fff; border-radius: 6px; font-size: 12px; color: #666; cursor: pointer; white-space: nowrap; }
+.ledger-cal-ghost:hover { border-color: #bbb; color: #1a1a1a; }
+.ledger-cal-ok { flex: 1; padding: 7px 0; border: 1px solid #2e7d32; background: #2e7d32; color: #fff; border-radius: 6px; font-size: 12px; cursor: pointer; }
+
+/* 입력줄: 구분 → 항목 → 금액 → 상세 → 고정비 → 등록 */
+.ledger-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 18px; padding-top: 16px; border-top: 1px solid #eee; }
+.ledger-acc { position: relative; }
+.ledger-acc > summary {
+  list-style: none; cursor: pointer; user-select: none; white-space: nowrap;
+  padding: 8px 12px; border: 1px solid #e5e5e5; border-radius: 6px; background: #fff; font-size: 13px; min-width: 104px;
+}
+.ledger-acc > summary::-webkit-details-marker { display: none; }
+.ledger-acc > summary::after { content: '▾'; float: right; margin-left: 10px; color: #aaa; }
+.ledger-acc[open] > summary { border-color: #1a1a1a; }
+.ledger-acc-menu {
+  position: absolute; z-index: 20; bottom: calc(100% + 4px); left: 0; min-width: 100%;
+  display: flex; flex-direction: column; max-height: 240px; overflow-y: auto;
+  background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.1);
+}
+.ledger-acc-menu button {
+  border: none; background: none; text-align: left; white-space: nowrap;
+  padding: 9px 14px; font-size: 13px; cursor: pointer; color: #333;
+}
+.ledger-acc-menu button:hover { background: #f5f5f5; }
+.ledger-amount { width: 120px; padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 13px; }
+.ledger-detail { flex: 1; min-width: 160px; padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 13px; }
+.ledger-fixed { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; white-space: nowrap; cursor: pointer; }
+.ledger-submit { padding: 8px 18px; border: 1px solid #2e7d32; background: #2e7d32; color: #fff; border-radius: 6px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.ledger-submit:disabled { opacity: .6; cursor: default; }
+.ledger-error { margin-top: 8px; font-size: 12px; color: #c62828; min-height: 16px; }
+
+@media (max-width: 768px) {
+  .ledger-columns { grid-template-columns: 1fr; }
+  .ledger-form > * { flex: 1 1 100%; }
+  .ledger-amount, .ledger-detail { width: auto; }
+}
+
+/* 홈: 만료 임박 / 생일 목록은 6명까지 보이고 그 아래는 스크롤
+   (.alert-row 한 줄 ≈ 위아래 패딩 20px + 이름 17px + 연락처 15px + 경계선 1px = 53px) */
+#expiring-list, #birthday-list { max-height: 318px; overflow-y: auto; }
+#expiring-list::-webkit-scrollbar, #birthday-list::-webkit-scrollbar { width: 4px; }
+#expiring-list::-webkit-scrollbar-thumb, #birthday-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+/* ── 업데이트 소식 (패치노트) ───────────────────────── */
+.patch-row {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 11px 6px; border: none; border-bottom: 1px solid #f5f5f5;
+  background: none; text-align: left; cursor: pointer; font-family: inherit;
+}
+.patch-row:last-child { border-bottom: none; }
+.patch-row:hover { background: #fafafa; }
+.patch-version {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px; font-weight: 700; color: #1a1a1a;
+  background: #f0f0f0; border-radius: 5px; padding: 3px 7px; white-space: nowrap;
+}
+.patch-date { font-size: 12px; color: #aaa; white-space: nowrap; }
+.patch-title {
+  flex: 1; font-size: 13px; color: #333;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.patch-scale { font-size: 11px; border-radius: 10px; padding: 2px 8px; white-space: nowrap; }
+
+.patch-meta { font-size: 12px; color: #aaa; margin-bottom: 10px; }
+.patch-summary {
+  font-size: 13px; line-height: 1.7; color: #333;
+  background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 14px;
+}
+.patch-section-title {
+  font-size: 13px; font-weight: 700; color: #1a1a1a;
+  margin: 22px 0 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;
+}
+.patch-list { margin: 0; padding-left: 18px; }
+.patch-list li { font-size: 13px; line-height: 1.8; color: #444; }
+.patch-howto { margin: 0; padding-left: 20px; }
+.patch-howto li { font-size: 13px; line-height: 1.6; color: #444; margin-bottom: 12px; }
+.patch-howto li > div { color: #666; margin-top: 3px; }
+.patch-howto code, .patch-list code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+  background: #f0f0f0; border-radius: 4px; padding: 1px 5px;
+}
+
+@media (max-width: 768px) {
+  .patch-row { flex-wrap: wrap; gap: 6px; }
+  .patch-title { flex: 1 1 100%; white-space: normal; }
+}
+.patch-author {
+  margin-top: 24px; padding-top: 14px; border-top: 1px solid #f0f0f0;
+  font-size: 12px; color: #999; text-align: right;
+}
+.patch-author b { color: #555; font-weight: 600; }
+
+/* 열람 권한이 없는 탭 — 눌러볼 수는 있고 누르면 '열람 권한이 없습니다.' 가 뜬다 */
+.nav-btn.locked,
+.sub-tab.locked { opacity: .45; }
+
+/* 정보 수정 탭의 사진 — 카메라를 켜면 미리보기 칸이 커진다 */
+.edit-photo-preview {
+  width: 92px; height: 92px; flex-shrink: 0;
+  border: 1px solid #eee; border-radius: 12px; background: #fafafa;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #bbb; overflow: hidden;
+}
+.edit-photo-preview.live { width: 200px; height: 200px; }
+.edit-photo-preview video { width: 100%; height: 100%; object-fit: cover; }
+.edit-photo-preview video.mirror { transform: scaleX(-1); }

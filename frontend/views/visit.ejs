@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>방문 신청 · CrossFit Grove</title>
+<link rel="stylesheet" href="/css/common.css">
+<link rel="stylesheet" href="/css/visit.css">
+</head>
+<body>
+
+<%- include('partials/header', { wrap: true, homeLink: true }) %>
+
+<section class="section">
+  <div class="page-title" id="page-title">VISIT US</div>
+  <div class="page-sub">원하는 날짜와 수업을 선택해 신청하세요. 빈 날짜를 눌러도 신청할 수 있습니다.</div>
+
+  <div class="type-tabs">
+    <div class="type-tab" id="tab-체험" onclick="setType('체험')">
+      <h3>🔥 1일 체험</h3>
+      <p>크로스핏이 처음이신가요?</p>
+    </div>
+    <div class="type-tab" id="tab-드랍인" onclick="setType('드랍인')">
+      <h3>💪 드랍인</h3>
+      <p>다른 박스 회원이신가요?</p>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+    <button class="cal-nav-btn" onclick="changeCalMonth(-1)">‹</button>
+    <span style="font-size:16px;font-weight:700;font-family:'Anton',sans-serif;letter-spacing:.05em" id="cal-month-label"></span>
+    <button class="cal-nav-btn" onclick="changeCalMonth(1)">›</button>
+  </div>
+  <div style="display:flex;gap:16px;margin-bottom:12px;font-size:12px;color:var(--gray);flex-wrap:wrap">
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lime);margin-right:4px;vertical-align:middle"></span>수업 있음</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#c62828;margin-right:4px;vertical-align:middle"></span>휴관일</span>
+    <span style="margin-left:auto;color:#555;font-size:11px">날짜를 클릭해서 신청</span>
+  </div>
+  <div class="cal-grid" id="cal-header" style="margin-bottom:4px"></div>
+  <div class="cal-grid" id="cal-body"></div>
+</section>
+
+<%- include('partials/footer') %>
+
+<!-- 수업 선택 모달 -->
+<div class="modal-bg" id="class-pick-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="class-pick-date-title"></span>
+      <button class="modal-close" onclick="closeClassPick()">✕</button>
+    </div>
+    <div id="class-pick-notice" style="display:none;background:#3a1a1a;border:1px solid #c62828;border-radius:8px;padding:10px 14px;font-size:13px;color:#ff8a80;margin-bottom:16px"></div>
+    <div id="class-pick-list"></div>
+    <div id="class-pick-empty" style="display:none;color:var(--gray);text-align:center;padding:20px;font-size:14px"></div>
+  </div>
+</div>
+
+<!-- 신청 모달 -->
+<div class="modal-bg" id="apply-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="apply-modal-title">신청</span>
+      <button class="modal-close" onclick="closeApplyModal()">✕</button>
+    </div>
+    <div id="apply-class-info" style="display:none;background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:10px 14px;font-size:13px;color:#ccc;margin-bottom:16px"></div>
+    <div class="form-group"><label>이름 *</label><input type="text" id="apply-name" placeholder="홍길동"></div>
+    <div class="form-group"><label>연락처 *</label><input type="text" id="apply-phone" placeholder="010-0000-0000"></div>
+    <div class="form-group"><label>희망 날짜</label><input type="date" id="apply-date"></div>
+    <div class="form-group"><label>메모 (선택)</label><textarea id="apply-memo" rows="6" placeholder="문의사항이 있으시면 적어주세요"></textarea></div>
+    <button class="modal-submit" onclick="submitApply()">신청하기</button>
+  </div>
+</div>
+
+<script src="/js/utils.js"></script>
+<script src="/js/visit.js"></script>
+</body>
+</html>

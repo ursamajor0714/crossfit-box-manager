@@ -1,0 +1,10 @@
+<header class="header">
+  <% if (locals.wrap) { %><div class="header-inner"><% } %>
+  <a href="/" class="logo">CROSSFIT <span>GROVE</span></a>
+  <% if (locals.homeLink) { %>
+  <a href="/" class="home-link">← 홈으로</a>
+  <% } else { %>
+  <a href="/member" class="login-btn">회원 로그인</a>
+  <% } %>
+  <% if (locals.wrap) { %></div><% } %>
+</header>

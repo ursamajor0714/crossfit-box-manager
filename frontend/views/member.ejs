@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrossFit Grove · 회원</title>
+<link rel="stylesheet" href="/css/common.css">
+<link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+
+<%- include('partials/header', { homeLink: true }) %>
+
+<!-- 로그인 화면 -->
+<div id="login-view" class="login-wrap">
+  <div class="login-title">MEMBER</div>
+  <div class="login-sub">회원 전용 페이지</div>
+  <div class="form-group">
+    <label>이름</label>
+    <input type="text" id="login-name" placeholder="홍길동">
+  </div>
+  <div class="form-group">
+    <label>비밀번호</label>
+    <input type="password" id="login-pw" placeholder="전화번호 뒷 4자리" onkeydown="if(event.key==='Enter')doLogin()">
+  </div>
+  <button class="login-btn" onclick="doLogin()">로그인</button>
+  <div class="login-hint">처음 로그인하시나요?<br>비밀번호는 <b style="color:#fff">전화번호 뒷 4자리</b>입니다.</div>
+</div>
+
+<!-- 대시보드 -->
+<div id="dash-view" class="dash hidden">
+  <div class="welcome">안녕하세요, <span id="member-name"></span>님</div>
+  <div class="welcome-sub">오늘도 화이팅! 💪</div>
+
+  <div class="card">
+    <div class="card-label">내 회원권</div>
+    <div id="membership-info"></div>
+  </div>
+
+  <div class="card hidden" id="message-card">
+    <div class="card-label">📩 안내 메시지</div>
+    <div id="message-content" style="font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-bottom:12px"></div>
+    <button class="btn-hold" onclick="dismissMessage()">확인했습니다</button>
+  </div>
+
+  <div class="card" id="locker-card">
+    <div class="card-label">락커 / 운동복</div>
+    <div id="locker-info"></div>
+  </div>
+
+  <div class="card" id="holding-card">
+    <div class="card-label">홀딩 신청</div>
+    <button class="btn-hold" onclick="openHold()">홀딩 신청하기</button>
+    <button onclick="toggleHoldingList()" id="holding-toggle-btn" style="width:100%;background:none;border:1px solid #333;color:#888;padding:11px;border-radius:8px;font-size:13px;cursor:pointer;margin-top:8px">기존 홀딩 신청 내역 보기 ▾</button>
+    <div style="margin-top:16px;display:none" id="holding-list"></div>
+  </div>
+
+  <div class="card hidden" id="special-card">
+    <div class="card-label">특별 연장</div>
+    <div id="special-list"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:24px;display:flex;gap:8px;justify-content:center">
+    <button class="btn-logout" onclick="openPwModal()">비밀번호 변경</button>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
+  </div>
+</div>
+
+<!-- 비밀번호 변경 모달 -->
+<div class="modal-bg" id="pw-modal">
+  <div class="modal">
+    <div class="modal-title">비밀번호 변경</div>
+    <div class="form-group">
+      <label>현재 비밀번호</label>
+      <input type="password" id="pw-current" placeholder="현재 비밀번호">
+    </div>
+    <div class="form-group">
+      <label>새 비밀번호 (8자 이상, 영소문자+숫자 포함)</label>
+      <input type="password" id="pw-new" placeholder="새 비밀번호">
+    </div>
+    <div class="form-group">
+      <label>새 비밀번호 확인</label>
+      <input type="password" id="pw-new2" placeholder="새 비밀번호 다시 입력" onkeydown="if(event.key==='Enter')submitPwChange()">
+    </div>
+    <button class="login-btn" onclick="submitPwChange()">변경하기</button>
+    <button class="btn-logout" style="width:100%;margin-top:8px" onclick="closePwModal()">취소</button>
+  </div>
+</div>
+
+<!-- 최초 로그인 비밀번호 강제 변경 모달 (닫기 버튼 없음 · 변경 완료 전까지 닫을 수 없음) -->
+<div class="modal-bg" id="force-pw-modal">
+  <div class="modal">
+    <div class="modal-title">비밀번호 변경이 필요합니다</div>
+    <div style="background:#0d0d0d;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px;font-size:12px;color:#aaa;margin-bottom:16px;line-height:1.6">
+      🔒 보안을 위해 비밀번호를 변경해야 계속 이용하실 수 있습니다.<br>
+      <b style="color:#ddd">8자 이상, 영소문자와 숫자를 포함</b>해야 합니다. (대문자·특수문자 사용 가능)
+    </div>
+    <div class="form-group">
+      <label>현재 비밀번호</label>
+      <input type="password" id="fpw-current" placeholder="현재 비밀번호">
+    </div>
+    <div class="form-group">
+      <label>새 비밀번호</label>
+      <input type="password" id="fpw-new" placeholder="새 비밀번호">
+    </div>
+    <div class="form-group">
+      <label>새 비밀번호 확인</label>
+      <input type="password" id="fpw-new2" placeholder="새 비밀번호 다시 입력" onkeydown="if(event.key==='Enter')submitForcePwChange()">
+    </div>
+    <button class="login-btn" onclick="submitForcePwChange()">비밀번호 변경하고 계속하기</button>
+  </div>
+</div>
+
+<!-- 홀딩 신청 모달 -->
+<div class="modal-bg" id="hold-modal">
+  <div class="modal">
+    <div class="modal-title">홀딩 신청</div>
+    <div id="hold-remain-info" style="color:var(--lime);font-size:13px;margin-bottom:16px;font-weight:700"></div>
+    <div class="form-group">
+      <label>홀딩 시작일</label>
+      <input type="date" id="hold-start">
+    </div>
+    <div class="form-group">
+      <label>홀딩 종료일</label>
+      <input type="date" id="hold-end">
+    </div>
+    <div style="background:#0d0d0d;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px;font-size:12px;color:#888;margin-bottom:8px;line-height:1.6">
+      ℹ️ 홀딩 신청 시 회원권 만료일이 자동 연장되며,<br>이용 중인 락커·운동복도 함께 연장됩니다.
+    </div>
+    <button class="login-btn" id="hold-submit-btn" onclick="submitHold()">신청하기</button>
+    <button class="btn-logout" style="width:100%;margin-top:8px" onclick="closeHold()">취소</button>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script src="/js/utils.js"></script>
+<script src="/js/member.js"></script>
+</body>
+</html>

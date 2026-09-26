@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+:root{--black:#0d0d0d;--dark:#1a1a1a;--lime:#c5ff2e;--gray:#888}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--black);color:#fff;line-height:1.6;min-height:100vh}
+.header{background:rgba(13,13,13,.92);border-bottom:1px solid #222;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Anton',sans-serif;font-size:20px;color:inherit;text-decoration:none}
+.logo span{color:var(--lime)}
+.home-link{color:var(--gray);text-decoration:none;font-size:13px}
+.home-link:hover{color:#fff}
+
+/* 로그인 */
+.login-wrap{max-width:380px;margin:80px auto;padding:0 24px}
+.login-title{font-family:'Anton',sans-serif;font-size:32px;text-align:center;margin-bottom:8px}
+.login-sub{color:var(--gray);text-align:center;font-size:14px;margin-bottom:32px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;color:var(--gray);margin-bottom:6px}
+.form-group input{width:100%;padding:13px;background:var(--dark);border:1px solid #333;border-radius:8px;color:#fff;font-size:15px;outline:none}
+.form-group input:focus{border-color:var(--lime)}
+.login-btn{width:100%;background:var(--lime);color:var(--black);border:none;padding:14px;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer;margin-top:8px}
+.login-hint{color:var(--gray);font-size:12px;text-align:center;margin-top:16px;line-height:1.7}
+
+/* 대시보드 */
+.dash{max-width:600px;margin:0 auto;padding:24px}
+.welcome{font-family:'Anton',sans-serif;font-size:28px;margin-bottom:4px}
+.welcome span{color:var(--lime)}
+.welcome-sub{color:var(--gray);font-size:14px;margin-bottom:24px}
+.card{background:var(--dark);border:1px solid #2a2a2a;border-radius:12px;padding:20px;margin-bottom:16px}
+.card-label{color:var(--lime);font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px}
+.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #222;font-size:14px}
+.info-row:last-child{border-bottom:none}
+.info-row .label{color:var(--gray)}
+.info-row .value{font-weight:500}
+.value.lime{color:var(--lime)}
+.value.warn{color:#ff6b3d}
+.btn-hold{width:100%;background:var(--lime);color:var(--black);border:none;padding:13px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-logout{background:none;border:1px solid #333;color:var(--gray);padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px}
+.hold-status{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #222;font-size:13px}
+.hold-status:last-child{border-bottom:none}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-pending{background:#3a3520;color:#ffd54f}
+.badge-approved{background:#1f3320;color:#81c784}
+.badge-rejected{background:#3a2020;color:#ff8a80}
+.empty{color:var(--gray);font-size:13px;text-align:center;padding:12px}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--dark);border:1px solid #333;border-radius:16px;padding:28px;width:400px;max-width:100%}
+.modal-title{font-family:'Anton',sans-serif;font-size:22px;margin-bottom:20px}
+.modal textarea{width:100%;padding:12px;background:var(--black);border:1px solid #333;border-radius:8px;color:#fff;font-family:inherit;outline:none}
+.hidden{display:none}

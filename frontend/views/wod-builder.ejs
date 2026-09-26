@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WOD 빌더 · CrossFit Grove</title>
+<link rel="stylesheet" href="/css/common.css">
+<link rel="stylesheet" href="/css/wod-builder.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="title">CROSSFIT <span>GROVE</span> · WOD 빌더</div>
+  <a href="/admin" style="color:#888;text-decoration:none;font-size:13px">← 관리자</a>
+</div>
+
+<div class="layout">
+  <!-- 좌: 화이트보드 -->
+  <div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div class="card-title" style="margin-bottom:0">화이트보드</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn ghost" onclick="addLine()">+ 줄</button>
+          <button class="btn ghost" onclick="clearBoard()">전체 지우기</button>
+        </div>
+      </div>
+      <div class="hint">우측 칩을 보드 위로 끌어오세요. 떨어뜨린 높이에 맞춰 줄이 자동 정렬됩니다. 줄을 클릭하면 직접 타이핑할 수 있어요.</div>
+      <div class="board" id="board"
+           ondragover="onBoardOver(event)" ondragleave="onBoardLeave(event)" ondrop="onBoardDrop(event)"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="card-title" style="margin-bottom:0">출력</div>
+        <button class="btn lime" onclick="copyOut()">📋 복사</button>
+      </div>
+      <div class="output" id="output"></div>
+    </div>
+  </div>
+
+  <!-- 우: 팔레트 -->
+  <div class="card" style="position:sticky;top:80px">
+    <div class="card-title">팔레트</div>
+
+    <div class="pal-sec">
+      <div class="pal-sec-title">포맷</div>
+      <div class="chips" id="fmt-chips"></div>
+    </div>
+
+    <div class="pal-sec">
+      <div class="pal-sec-title">숫자 · 단위</div>
+      <div class="chips" id="num-chips"></div>
+      <div class="chips" id="unit-chips" style="margin-top:6px"></div>
+      <div class="custom-add">
+        <input id="custom-num" placeholder="직접 숫자/단어 (예: 18, 400m)">
+        <button class="btn" onclick="addCustomNum()">칩</button>
+      </div>
+    </div>
+
+    <div class="pal-sec">
+      <div class="pal-sec-title">동작 <span style="font-weight:400;color:#aaa;font-size:11px">— 클릭/드롭 시 관련 무게가 아래에 표시</span></div>
+      <input class="search" id="move-search" placeholder="동작 검색..." oninput="renderMovePalette()">
+      <div id="move-palette"></div>
+      <div id="linked-wt"></div>
+      <div class="custom-add">
+        <input id="custom-move" placeholder="새 동작 이름">
+        <select id="custom-cat"></select>
+        <button class="btn" onclick="addCustomMove()">추가</button>
+      </div>
+    </div>
+
+    <div class="pal-sec">
+      <div class="pal-sec-title">무게 · 높이 <span style="font-weight:400;color:#aaa;font-size:11px">(남/여 · lbs, 케틀벨 kg)</span></div>
+      <div id="wt-groups"></div>
+      <div class="custom-add">
+        <input id="custom-wt" placeholder="예: 115/80lb">
+        <button class="btn" onclick="addCustomWt()">칩</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer', { theme: 'light' }) %>
+
+<script src="/js/utils.js"></script>
+<script src="/js/wod-builder.js"></script>
+</body>
+</html>

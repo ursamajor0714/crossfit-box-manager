@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>회원 가입 신청서 · CrossFit Grove</title>
+<link rel="stylesheet" href="/css/common.css">
+<link rel="stylesheet" href="/css/contract.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">CROSSFIT <span>GROVE</span> 군자점</div>
+  <div class="sub">회원 가입 신청서</div>
+</div>
+
+<!-- 비밀번호 잠금 화면 -->
+<div class="wrap" id="lock-view">
+  <div class="card" style="max-width:400px;margin:40px auto;text-align:center">
+    <div style="font-size:40px;margin-bottom:8px">🔒</div>
+    <div class="card-title" style="justify-content:center">직원 인증</div>
+    <div class="card-desc">계약서 작성을 시작하려면 직원이 비밀번호를 입력해 주세요.</div>
+    <input type="password" id="lock-pw" placeholder="비밀번호" style="text-align:center;margin-bottom:10px" onkeydown="if(event.key==='Enter')unlockContract()">
+    <div id="lock-error" style="color:#e53935;font-size:13px;margin-bottom:10px;min-height:18px"></div>
+    <button class="submit-btn" onclick="unlockContract()">확인</button>
+  </div>
+</div>
+
+<div class="wrap hidden" id="form-view">
+  <!-- 가입 유형 선택 — 계약서는 신규 가입만 받으므로 화면에서 숨김.
+       (contractType 기본값이 '신규'이고, 재등록은 관리자 화면에서 처리) -->
+  <div class="card" style="display:none">
+    <div class="card-title">가입 유형</div>
+    <div class="chips" style="margin-top:4px">
+      <span class="chip on" id="type-new" data-v="신규" onclick="pickContractType('신규')">신규 가입</span>
+      <span class="chip" id="type-renew" data-v="재등록" onclick="pickContractType('재등록')">재등록 (기존 회원)</span>
+    </div>
+  </div>
+
+  <!-- 재등록: 회원 선택 -->
+  <div class="card hidden" id="renew-pick-card">
+    <div class="card-title">본인 선택</div>
+    <div class="card-desc">아래에서 본인 이름을 찾아 선택해 주세요.</div>
+    <input type="text" id="renew-search" placeholder="이름 검색" oninput="filterRenewMembers()" style="margin-bottom:10px">
+    <div id="renew-member-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:10px"></div>
+    <div id="renew-selected" class="hidden" style="margin-top:12px;padding:12px 14px;background:#1a1f0d;border:1px solid var(--lime);border-radius:10px;color:#fff;font-weight:600"></div>
+    <div id="renew-facility" class="hidden" style="margin-top:10px"></div>
+  </div>
+
+  <!-- 1. 기본 정보 -->
+  <div class="card member-only" id="card-basic">
+    <div class="card-title"><span class="step-num">1</span> 기본 정보</div>
+    <div class="card-desc">정확한 정보를 입력해 주세요.</div>
+    <div class="grid2">
+      <div class="field"><label>이름 <span class="req">*</span></label><input type="text" id="f-name" placeholder="홍길동"></div>
+      <div class="field"><label>연락처 <span class="req">*</span></label><input type="tel" id="f-phone" placeholder="010-0000-0000"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>생년월일</label><input type="date" id="f-birth"></div>
+      <div class="field"><label>성별</label>
+        <div class="chips" id="gender-chips">
+          <span class="chip" data-v="남" onclick="pickChip('gender',this)">남</span>
+          <span class="chip" data-v="여" onclick="pickChip('gender',this)">여</span>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>인스타그램 아이디</label><input type="text" id="f-insta" placeholder="@아이디 (선택)"></div>
+    <div class="grid2">
+      <div class="field"><label>거주 지역</label><input type="text" id="f-region" placeholder="예: 군자동"></div>
+      <div class="field"><label>가입 경로</label>
+        <select id="f-source">
+          <option value="">선택</option>
+          <option>인스타</option>
+          <option>네이버</option>
+          <option>지인</option>
+          <option>오프라인</option>
+          <option>기타</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 본인 사진 -->
+  <div class="card member-only" id="card-photo">
+    <div class="card-title"><span class="step-num">2</span> 본인 사진</div>
+    <div class="card-desc">회원 식별용 사진을 촬영해 주세요.</div>
+    <div class="photo-area">
+      <div class="photo-preview" id="photo-preview">사진 없음</div>
+      <div class="btn-row">
+        <button class="btn btn-dark" id="cam-btn" onclick="startCamera()">📷 카메라 켜기</button>
+        <button class="btn btn-lime hidden" id="shoot-btn" onclick="takePhoto()">촬영</button>
+        <button class="btn btn-ghost hidden" id="flip-btn" onclick="flipCamera()">🔄 전/후면</button>
+        <button class="btn btn-ghost hidden" id="retake-btn" onclick="startCamera()">다시 찍기</button>
+      </div>
+      <div class="note">카메라가 안 되면 건너뛰고 데스크에 문의해 주세요.</div>
+    </div>
+  </div>
+
+  <!-- 3. 운동 정보 -->
+  <div class="card member-only" id="card-exercise">
+    <div class="card-title"><span class="step-num">3</span> 운동 정보</div>
+    <div class="card-desc">더 안전하고 맞춤된 코칭을 위해 참고합니다.</div>
+    <div class="field">
+      <label>크로스핏 방향성 (복수 선택 가능)</label>
+      <div class="chips" id="goal-chips">
+        <span class="chip" data-v="다이어트" onclick="toggleChip(this)">다이어트</span>
+        <span class="chip" data-v="체력 증진" onclick="toggleChip(this)">체력 증진</span>
+        <span class="chip" data-v="근력 향상" onclick="toggleChip(this)">근력 향상</span>
+        <span class="chip" data-v="경쟁/대회" onclick="toggleChip(this)">경쟁/대회</span>
+        <span class="chip" data-v="재미/취미" onclick="toggleChip(this)">재미/취미</span>
+        <span class="chip" data-v="재활/건강" onclick="toggleChip(this)">재활/건강</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>부상 이력 / 건강 특이사항</label>
+      <textarea id="f-injury" rows="3" placeholder="허리, 무릎, 어깨 등 주의가 필요한 부위나 질환이 있다면 적어주세요. (없으면 비워두세요)"></textarea>
+    </div>
+  </div>
+
+  <!-- 직원 작성란 -->
+  <div class="card" id="staff-section" style="background:#2a2a2a;border-color:#444">
+    <div class="card-title" style="color:#fff"><span class="step-num" style="background:var(--lime);color:#1a1a1a">👔</span> 직원 작성란</div>
+    <div class="card-desc" style="color:#aaa">상담 직원이 작성하는 영역입니다. 회원님은 비워두세요.</div>
+    <!-- 회원권 종류 (신규만) -->
+    <div class="field" id="s-membership-type-row" style="margin-bottom:14px">
+      <label style="color:#ddd">회원권 종류</label>
+      <div class="chips" id="s-mtype-chips">
+        <span class="chip on" id="mtype-period" data-v="기간제" onclick="pickMembershipType('기간제')" style="background:var(--lime);color:#1a1a1a;border-color:var(--lime)">기간제</span>
+        <span class="chip" id="mtype-count" data-v="횟수권" onclick="pickMembershipType('횟수권')" style="background:#1a1a1a;color:#fff;border-color:#555">횟수권</span>
+        <span class="chip" id="mtype-staff" data-v="직원" onclick="pickMembershipType('직원')" style="background:#1a1a1a;color:#fff;border-color:#555">직원등록</span>
+      </div>
+      <div id="staff-lock-note" style="display:none;margin-top:10px;background:#1a1a1a;border:1px solid var(--lime);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--lime);line-height:1.6">
+        코치(부운영자)로 등록합니다.<br>
+        <span style="color:#aaa">회원권 결제가 없어 아래 칸은 모두 비웁니다. 제출하면 회원 정보에 직원으로 바로 등록되고,<br>열람 권한은 관리자가 회원 상세에서 정해 줍니다.</span>
+      </div>
+    </div>
+    <!-- 기간제 필드 -->
+    <div id="s-period-fields">
+      <div class="grid2">
+        <div class="field">
+          <label style="color:#ddd">요금제</label>
+          <select id="s-plan" onchange="updateContractPeriods(); resetAmountAuto()" style="background:#1a1a1a;color:#fff;border-color:#555"></select>
+        </div>
+        <div class="field">
+          <label style="color:#ddd">기간</label>
+          <select id="s-period" onchange="onContractPeriodChange()" style="background:#1a1a1a;color:#fff;border-color:#555"></select>
+        </div>
+      </div>
+    </div>
+    <!-- 횟수권 필드 -->
+    <div id="s-count-fields" style="display:none">
+      <div class="grid2">
+        <div class="field">
+          <label style="color:#ddd">총 횟수</label>
+          <input type="number" id="s-count-total" min="1" placeholder="예: 10" oninput="calcContractTotal()" style="background:#1a1a1a;color:#fff;border-color:#555">
+        </div>
+        <div class="field"></div>
+      </div>
+    </div>
+    <div class="grid2" id="s-custom-date-row" style="display:none">
+      <div class="field">
+        <label style="color:#ddd">시작일 (직접입력)</label>
+        <input type="date" id="s-start" onchange="calcContractTotal()" style="background:#1a1a1a;color:#fff;border-color:#555">
+      </div>
+      <div class="field">
+        <label style="color:#ddd">만료일 (직접입력)</label>
+        <input type="date" id="s-end" onchange="calcContractTotal()" style="background:#1a1a1a;color:#fff;border-color:#555">
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label style="color:#ddd">할인율</label>
+        <select id="s-discount" onchange="resetAmountAuto()" style="background:#1a1a1a;color:#fff;border-color:#555">
+          <option value="0">없음</option>
+          <option value="0.01">1% (지인소개)</option>
+          <option value="0.05">5% (출석이벤트)</option>
+          <option value="0.1">10% (직업할인)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label style="color:#ddd">회원권 금액 (직접 수정 가능)</label>
+        <input type="number" id="s-amount" placeholder="자동 계산됨" oninput="onAmountManual()" style="background:#1a1a1a;color:var(--lime);border-color:#555;font-weight:700;font-size:18px">
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label style="color:#ddd">락커 (개월, 선택)</label>
+        <input type="number" id="s-locker" min="0" placeholder="미사용 시 비움" oninput="calcContractTotal()" style="background:#1a1a1a;color:#fff;border-color:#555">
+      </div>
+      <div class="field">
+        <label style="color:#ddd">운동복 (개월, 선택)</label>
+        <input type="number" id="s-uniform" min="0" placeholder="미사용 시 비움" oninput="calcContractTotal()" style="background:#1a1a1a;color:#fff;border-color:#555">
+      </div>
+    </div>
+    <div id="s-total-box" style="display:none;background:#1a1a1a;border:1px solid var(--lime);border-radius:10px;padding:12px 14px;margin-bottom:16px">
+      <div id="s-total-breakdown" style="font-size:12px;color:#aaa;margin-bottom:6px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:14px;font-weight:600;color:#ddd">총 최종 금액</span>
+        <span id="s-total-amount" style="font-size:22px;font-weight:700;color:var(--lime)">-</span>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label style="color:#ddd">직원 메모 (선택)</label>
+      <input type="text" id="s-memo" placeholder="결제수단, 특이사항 등" style="background:#1a1a1a;color:#fff;border-color:#555">
+    </div>
+  </div>
+
+  <!-- 4. 약관 -->
+  <div class="card">
+    <div class="card-title"><span class="step-num">4</span> 가입 약관 동의</div>
+    <div class="card-desc">아래 약관을 끝까지 읽고 동의해 주세요.</div>
+    <div class="terms-box" id="terms-box">
+      <div class="terms-title">가 입 약 관</div>
+      <p>* 1일 입장료(드랍인)는 25,000원입니다.</p>
+
+      <h3>1. 홀딩</h3>
+      <p>홀딩 기간은 1개월(0일), 3개월(10일), 6개월(30일)로 제한하며, 홀딩은 원하는 날짜에 사용 가능합니다.</p>
+      <p>홀딩은 운동 기간에 대해서만 가능하며, 홀딩 시 개인 락커와 운동복 대여 기간도 함께 정지(홀딩)됩니다.</p>
+      <p>제공된 홀딩 이외에 [크로스핏 그로브]에서 인정하는 정당한 사유로 인한 홀딩의 경우 협의에 의해 신청할 수 있습니다. (예: 코로나 감염, 골절, 해외출장, 신혼여행 등)</p>
+
+      <h3>2. 양도</h3>
+      <p>본 계약에 따른 회원권 이용은 본인만 사용함을 원칙으로 하나, 부득이한 경우 [크로스핏 그로브]의 사전 승인을 받아 양도할 수 있습니다.</p>
+      <p>양도는 1회에 한해서만 가능하며 양도 시 수수료(50,000원)가 부과됩니다.</p>
+      <p>양도 시 가입 시 받은 서비스 혜택(홀딩)은 자동 소멸되며, 양수인은 홀딩·재양도·환불이 불가하며 회원 간 양도는 불가능합니다.</p>
+
+      <h3>3. 해지</h3>
+      <p>계약 해지 시 가입하신 총합계 금액의 10%(공정거래법 준함)에 상당하는 해지 위약금, 해지일까지 이용일 수에 해당하는 금액을 정상금액(일 8,333원) 기준으로 정산 후 공제하여 잔여금액을 환불받을 수 있습니다.</p>
+      <p>해지 시 홀딩 기간도 이용 기간으로 포함됩니다.</p>
+
+      <h3>4. 회원 자격 상실</h3>
+      <p>[크로스핏 그로브]는 다른 회원님의 안전과 배려를 위해 본 계약서의 등록조건 및 회원권 규정을 위반하거나 다른 회원님의 수업에 방해되는 행동을 하시는 회원님의 회원권을 강제 해지할 수 있습니다.</p>
+
+      <h3>5. 추가비용</h3>
+      <p>[크로스핏 그로브]는 기본 시설을 제외한 부대시설을 별도의 추가 비용으로 이용하실 수 있습니다.</p>
+      <p>개인락커(월 5,000원), 운동복(월 15,000원)을 신청 후 사용할 수 있습니다. 회원권 또는 락커 기간 경과 후 회수하지 않을 시 별도의 통보 없이 임의로 폐기하며, [크로스핏 그로브]는 일체의 배상책임을 지지 않습니다.</p>
+
+      <h3>6. 면책규정</h3>
+      <p>귀중품은 반드시 안내데스크에 보관하시고 회원의 부주의로 인한 분실 또는 도난 시 [크로스핏 그로브]의 책임은 없습니다.</p>
+      <p>본 시설은 운동을 위한 공간이므로 휴대폰 및 귀중품을 바닥에 둘 시 파손의 우려가 있으므로 락카 또는 핸드폰 보관 장소에 보관 바랍니다. 부주의로 인한 파손에 [크로스핏 그로브]는 책임이 없습니다.</p>
+      <p>회원님은 본 박스가 시설관리 또는 회원 질서유지 등과 관련하여 책임이 없는 경우를 제외하고 회원님 또는 제3자의 행위로 인한 회원님의 신체 또는 정신적 장애나 경제적 손실에 대하여 [크로스핏 그로브]는 책임이 없다는 것에 동의합니다.</p>
+
+      <h3>7. 회원님의 권리와 의무</h3>
+      <p>회원님의 권리와 의무는 본 계약 및 회원권 규정에 명시되어 있습니다. 회원님은 본 계약서에 서명할 때 회원님의 권리와 의무를 수락하였음을 인정합니다.</p>
+      <p>본 약관에 [크로스핏 그로브]와 관련된 모든 사항은 [크로스핏 그로브]가 정한 기본 규정에 준합니다. 이 계약과 관련하여 회원님으로부터 취득한 개인정보는 일체 외부 유출이 금지되며, 관련 법률이 정한 바에 따라 엄격히 관리됩니다. 본인은 회원 가입 약관에 명시된 모든 계약 조건을 알고 이해하였으며 이에 동의합니다. 본인은 가입신청서에 서명함으로써 [크로스핏 그로브]의 회원이 되었으며 회원가입 약관의 조항에 관련해 [크로스핏 그로브]와 법적 구속력이 있는 계약 관계가 되었음을 인정합니다. 따라서 가입신청서에 명시된 권리와 의무에 대해 동의하며, 모든 내용을 숙지하였으며 이에 동의합니다.</p>
+
+      <h3>8. 초상권 사용 동의</h3>
+      <p>개인정보 보호 정책으로 홈페이지, 카페, SNS 등 다양한 홍보 매체를 통해 정보를 공유함에 따라 [크로스핏 그로브] 운영 시 촬영된 대상자 사진 및 영상과 관련하여 초상권 사용에 대해 동의합니다.</p>
+    </div>
+
+    <label class="agree-row" id="agree-all-row">
+      <input type="checkbox" id="agree-all" onchange="checkSubmit()">
+      <span class="t"><b>위 가입 약관 및 개인정보 수집·이용, 초상권 사용에 모두 동의합니다.</b> (필수)</span>
+    </label>
+  </div>
+
+  <!-- 5. 서명 -->
+  <div class="card">
+    <div class="card-title"><span class="step-num">5</span> 서명</div>
+    <div class="card-desc">아래 칸에 손가락으로 서명해 주세요.</div>
+    <canvas class="sign-box" id="sign-canvas" width="620" height="200"></canvas>
+    <div class="sign-actions">
+      <span class="note" id="sign-name-label"></span>
+      <button class="sign-clear" onclick="clearSign()">지우고 다시</button>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitContract()" disabled>제출하기</button>
+  <div class="note" style="text-align:center;margin-top:10px">제출 후 데스크에서 등록을 도와드립니다.</div>
+</div>
+
+<!-- 완료 화면 -->
+<div class="wrap hidden" id="done-view">
+  <div class="card done">
+    <div class="check">✅</div>
+    <h2>제출되었습니다!</h2>
+    <p>데스크에서 가입을 도와드릴게요.<br>잠시만 기다려 주세요.</p>
+    <button class="btn btn-dark" style="margin-top:24px" onclick="location.reload()">새 신청서 작성</button>
+  </div>
+</div>
+
+<script src="/js/utils.js"></script>
+<script src="/js/photo-capture.js"></script>
+<script src="/js/contract.js"></script>
+
+<%- include('partials/footer', { theme: 'light' }) %>
+
+
+</body>
+</html>

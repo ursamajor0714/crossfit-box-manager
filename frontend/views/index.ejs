@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrossFit Grove 군자</title>
+<!-- PWA 홈화면 추가 -->
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CF Grove">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="stylesheet" href="/css/common.css">
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+
+<%- include('partials/header', { wrap: true }) %>
+
+<section class="hero">
+  <div class="hero-eyebrow">군자동 · Since 2026</div>
+  <h1>FORGE YOUR<br><span class="outline">STRENGTH</span></h1>
+  <p>당신의 한계를 다시 정의하세요. 크로스핏 그로브에서 함께 성장합니다.</p>
+  <div class="hero-cta">
+    <button class="btn-primary" id="btn-hero-visit">1일 체험 신청</button>
+    <button class="btn-outline" id="btn-hero-dropin">드랍인 신청</button>
+  </div>
+</section>
+
+<!-- WOD -->
+<section class="section">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <h2 class="section-title">WOD</h2>
+    <span class="section-line"></span>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:24px">
+    <button class="wod-nav-btn" id="btn-wod-prev">‹</button>
+    <input type="date" id="wod-date-picker" style="background:#1a1a1a;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:8px;font-family:inherit;font-size:14px;outline:none">
+    <button class="wod-nav-btn" id="btn-wod-next">›</button>
+  </div>
+  <div id="wod-container"><div class="wod-empty">불러오는 중...</div></div>
+</section>
+
+<!-- 캘린더 -->
+<section class="section" style="padding-top:0">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <h2 class="section-title">SCHEDULE</h2>
+    <span class="section-line"></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+    <button class="cal-nav-btn" id="btn-cal-prev">‹</button>
+    <span style="font-size:16px;font-weight:700;font-family:'Anton',sans-serif;letter-spacing:.05em" id="cal-month-label"></span>
+    <button class="cal-nav-btn" id="btn-cal-next">›</button>
+  </div>
+  <div style="display:flex;gap:16px;margin-bottom:12px;font-size:12px;color:var(--gray);flex-wrap:wrap">
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#c62828;margin-right:4px;vertical-align:middle"></span>휴관일</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#1565c0;margin-right:4px;vertical-align:middle"></span>오픈짐</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#e65100;margin-right:4px;vertical-align:middle"></span>이벤트</span>
+    <span style="margin-left:auto;color:#555;font-size:11px">수업 시간표·신청은 상단 ‘체험/드랍인 신청’에서</span>
+  </div>
+  <div class="cal-grid" id="cal-header" style="margin-bottom:4px"></div>
+  <div class="cal-grid" id="cal-body"></div>
+</section>
+
+<!-- 공지사항 -->
+<section class="section" style="padding-top:0">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <h2 class="section-title">NOTICE</h2>
+    <span class="section-line"></span>
+  </div>
+  <div class="notice-list" id="notice-list">
+    <div class="wod-empty">등록된 공지가 없습니다</div>
+  </div>
+</section>
+
+<!-- JOIN US -->
+<section class="section" style="padding-top:0">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <h2 class="section-title">JOIN US</h2>
+    <span class="section-line"></span>
+  </div>
+  <div class="type-tabs">
+    <div class="type-tab active" id="join-tab-체험">
+      <h3>🔥 1일 체험</h3>
+      <p>크로스핏이 처음이신가요?</p>
+    </div>
+    <div class="type-tab" id="join-tab-드랍인">
+      <h3>💪 드랍인</h3>
+      <p>다른 박스 회원이신가요?</p>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+    <button class="cal-nav-btn" id="join-btn-cal-prev">‹</button>
+    <span style="font-size:16px;font-weight:700;font-family:'Anton',sans-serif;letter-spacing:.05em" id="join-cal-month-label"></span>
+    <button class="cal-nav-btn" id="join-btn-cal-next">›</button>
+  </div>
+  <div style="display:flex;gap:16px;margin-bottom:12px;font-size:12px;color:var(--gray);flex-wrap:wrap">
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lime);margin-right:4px;vertical-align:middle"></span>수업 있음</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#c62828;margin-right:4px;vertical-align:middle"></span>휴관일</span>
+    <span style="margin-left:auto;color:#555;font-size:11px">날짜를 클릭해서 신청</span>
+  </div>
+  <div class="cal-grid" id="join-cal-header" style="margin-bottom:4px"></div>
+  <div class="cal-grid" id="join-cal-body"></div>
+</section>
+
+<!-- 홈 화면 추가 배너 -->
+<div class="add-to-home-banner" id="add-to-home-banner">
+  <div class="add-to-home-icon">📲</div>
+  <div class="add-to-home-text">
+    <strong>홈 화면에 추가하기</strong>
+    <span>앱처럼 빠르게 CrossFit Grove에 접속하세요</span>
+  </div>
+  <div class="add-to-home-arrow">＋</div>
+</div>
+
+<!-- iOS 안내 모달 -->
+<div class="modal-bg" id="ios-guide-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>홈 화면에 추가</span>
+      <button class="modal-close" id="btn-close-ios-modal">✕</button>
+    </div>
+    <p style="color:var(--gray);font-size:13px;margin-bottom:4px">Safari에서 아래 순서로 진행해 주세요</p>
+    <ul class="ios-guide-steps">
+      <li><span class="step-num">1</span> 하단 가운데 <strong style="color:#fff;margin:0 2px">공유</strong> 버튼(□↑)을 탭하세요</li>
+      <li><span class="step-num">2</span> 메뉴에서 <strong style="color:#fff;margin:0 2px">"홈 화면에 추가"</strong>를 탭하세요</li>
+      <li><span class="step-num">3</span> 오른쪽 위 <strong style="color:#fff;margin:0 2px">"추가"</strong>를 탭하면 완료!</li>
+    </ul>
+  </div>
+</div>
+
+<!-- JOIN US 수업 선택 모달 -->
+<div class="modal-bg" id="join-class-pick-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="join-class-pick-date-title"></span>
+      <button class="modal-close" id="btn-close-join-class-pick">✕</button>
+    </div>
+    <div id="join-class-pick-notice" style="display:none;background:#1a1a2e;border:1px solid #1565c0;border-radius:8px;padding:10px 14px;font-size:13px;color:#90caf9;margin-bottom:16px"></div>
+    <div id="join-class-pick-list"></div>
+    <div id="join-class-pick-empty" style="display:none;color:var(--gray);text-align:center;padding:20px;font-size:14px"></div>
+  </div>
+</div>
+
+<!-- JOIN US 신청 모달 -->
+<div class="modal-bg" id="join-apply-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="join-apply-modal-title">신청</span>
+      <button class="modal-close" id="btn-close-join-apply-modal">✕</button>
+    </div>
+    <div id="join-apply-class-info" style="display:none;background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:10px 14px;font-size:13px;color:#ccc;margin-bottom:16px"></div>
+    <div class="form-group"><label>이름 *</label><input type="text" id="join-apply-name" placeholder="홍길동"></div>
+    <div class="form-group"><label>연락처 *</label><input type="text" id="join-apply-phone" placeholder="010-0000-0000"></div>
+    <div class="form-group"><label>희망 날짜</label><input type="date" id="join-apply-date"></div>
+    <div class="form-group"><label>메모 (선택)</label><textarea id="join-apply-memo" rows="6" placeholder="문의사항이 있으시면 적어주세요"></textarea></div>
+    <button class="modal-submit" id="btn-submit-join-apply">신청하기</button>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<!-- 공지 상세 팝업 -->
+<div class="modal-bg" id="notice-pop-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="notice-pop-title"></span>
+      <button class="modal-close" id="btn-close-notice-modal">✕</button>
+    </div>
+    <div id="notice-pop-body"></div>
+  </div>
+</div>
+
+<script src="/js/utils.js"></script>
+<script src="/js/index.js"></script>
+</body>
+</html>

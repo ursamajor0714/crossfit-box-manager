@@ -1,0 +1,25 @@
+{
+  "name": "CrossFit Grove 군자",
+  "short_name": "CF Grove",
+  "description": "CrossFit Grove 군자점 공식 앱",
+  "start_url": "https://cfgrove.com/",
+  "scope": "https://cfgrove.com/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0d0d",
+  "theme_color": "#c5ff2e",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

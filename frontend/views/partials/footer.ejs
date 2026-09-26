@@ -1,0 +1,43 @@
+<% const light = locals.theme === 'light'; %>
+<footer style="border-top:1px solid <%= light ? '#e5e5e5' : '#222' %>;padding:<%= light ? '32px' : '40px' %> 24px;text-align:center;color:<%= light ? '#888' : 'var(--gray)' %>;font-size:<%= light ? '12px' : '13px' %>">
+  <p>🏋️ CROSSFIT GROVE</p>
+  <p>👤 대표자: 홍길동</p>
+  <p>📞 010-0000-0000</p>
+  <p>📄 사업자등록번호: 000-00-00000</p>
+  <p>📍 서울특별시 ○○구 ○○로 000</p>
+  © <span id="copyright-year"><%= new Date().getFullYear() %></span> CrossFit Grove. All rights reserved.
+  <p style="margin-top:8px">
+    <button type="button" class="footer-link-btn" id="btn-open-pricing">PRICE</button>
+    <span style="margin:0 8px">·</span>
+    <button type="button" class="footer-link-btn" id="btn-open-privacy">PRIVACY POLICY</button>
+  </p>
+</footer>
+
+<div class="site-modal-bg" id="pricing-modal">
+  <div class="site-modal site-modal-pricing">
+    <div class="site-modal-title">
+      <span>PRICE</span>
+      <button type="button" class="site-modal-close" id="btn-close-pricing">✕</button>
+    </div>
+    <%# 프로모션 재개 시: PROMO_END를 종료일(KST)로 지정하고 images/pricing-promo.png를 교체. null이면 미노출 %>
+    <% const PROMO_END = null; %>
+    <% const showPromo = PROMO_END && new Date() <= new Date(PROMO_END); %>
+    <div class="pricing-modal-images">
+      <% if (showPromo) { %><img src="/images/pricing-promo.png" alt="프로모션 가격표"><% } %>
+      <img src="/images/pricing-general.png" alt="일반 회원권 가격표">
+    </div>
+  </div>
+</div>
+
+<div class="site-modal-bg" id="privacy-modal">
+  <div class="site-modal site-modal-wide">
+    <div class="site-modal-title">
+      <span>PRIVACY POLICY</span>
+      <button type="button" class="site-modal-close" id="btn-close-privacy">✕</button>
+    </div>
+    <%- include('privacy-policy') %>
+  </div>
+</div>
+
+<script src="/js/pricing-modal.js"></script>
+<script src="/js/privacy-modal.js"></script>

@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrossFit Grove</title>
+<link rel="stylesheet" href="/css/common.css">
+<% if (isAuthenticated) { %>
+<link rel="stylesheet" href="/css/admin.css">
+<% } %>
+</head>
+<body>
+
+<% if (!isAuthenticated) { %>
+<!-- 관리자 로그인 게이트 -->
+<div id="admin-gate" style="position:fixed;inset:0;background:#0d0d0d;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:-apple-system,sans-serif">
+  <div style="text-align:center;width:340px;max-width:90vw">
+    <div style="font-family:sans-serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:4px">CrossFit Grove</div>
+    <div style="color:#888;font-size:13px;margin-bottom:28px">관리자 로그인</div>
+    <input type="password" id="admin-pw" placeholder="비밀번호" style="width:100%;padding:13px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:15px;outline:none;margin-bottom:12px" onkeydown="if(event.key==='Enter')adminLogin()">
+    <button onclick="adminLogin()" style="width:100%;padding:13px;background:#c5ff2e;color:#0d0d0d;border:none;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer">로그인</button>
+    <div id="admin-pw-error" style="color:#ff6b3d;font-size:13px;margin-top:12px;height:18px"></div>
+  </div>
+</div>
+<script>
+async function adminLogin() {
+  const pw = document.getElementById('admin-pw').value;
+  const res = await fetch('/api/admin/login', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({password: pw})
+  });
+  if (res.ok) {
+    const data = await res.json();
+    sessionStorage.setItem('adminAuth', 'true');
+    sessionStorage.setItem('adminToken', data.token);
+    location.reload();
+  } else {
+    const data = await res.json();
+    document.getElementById('admin-pw-error').textContent = data.error || '비밀번호가 일치하지 않습니다';
+    document.getElementById('admin-pw').value = '';
+  }
+}
+</script>
+<% } else { %>
+
+
+
+<div class="header">
+  <div>
+    <div class="header-title">CrossFit Grove</div>
+    <div class="header-sub" id="header-who">관리자 대시보드</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <a href="/contract" class="add-btn" id="contract-write-link" data-perm="contract.write" style="text-decoration:none">📋 계약서 작성</a>
+    <button class="action-btn" onclick="adminLogout()">로그아웃</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" data-perm="home" onclick="openPage('home')">홈</button>
+  <button class="nav-btn" data-perm="revenue.list" onclick="openPage('revenue')">매출 관리</button>
+  <button class="nav-btn" data-perm="members.list" onclick="openPage('members')">회원 관리</button>
+  <button class="nav-btn" data-perm="locker" onclick="openPage('locker-uniform')">락커</button>
+  <button class="nav-btn" data-perm="schedule" onclick="openPage('schedule-all')">시간표/신청</button>
+  <button class="nav-btn" data-perm="wod" onclick="openPage('wod')">WOD</button>
+  <button class="nav-btn" data-perm="notices" onclick="openPage('notices')">공지</button>
+  <button class="nav-btn" data-perm="sms" onclick="openPage('sms')">문자 발송</button>
+</nav>
+
+<div class="content">
+
+  <!-- 열람 권한이 없는 탭을 눌렀을 때 대신 보여주는 화면 -->
+  <div id="page-denied" class="page">
+    <div class="card" style="text-align:center;padding:52px 20px">
+      <div style="font-size:34px">🔒</div>
+      <div style="margin-top:12px;font-size:16px;font-weight:600">열람 권한이 없습니다.</div>
+      <div style="margin-top:8px;font-size:13px;color:#888;line-height:1.7">이 화면은 관리자가 허용한 코치만 볼 수 있습니다.<br>필요하시면 관리자에게 요청해 주세요.</div>
+    </div>
+  </div>
+
+  <!-- 홈 -->
+  <div id="page-home" class="page active">
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">활성 회원</div><div class="metric-value" id="stat-members">-</div></div>
+      <div class="metric"><div class="metric-label">락커 사용</div><div class="metric-value" id="stat-lockers">-</div><div class="metric-sub">총 152개 중</div></div>
+      <div class="metric"><div class="metric-label">만료 임박 (7일)</div><div class="metric-value" id="stat-expiring" style="color:#c62828">-</div></div>
+    </div>
+    <div class="card">
+      <div class="section-two">
+        <div>
+          <div class="card-title">⏰ 회원권 만료 임박</div>
+          <div id="expiring-list"><div class="empty-state">불러오는 중...</div></div>
+        </div>
+        <div>
+          <div class="card-title">🎂 생일</div>
+          <div id="birthday-list"><div class="empty-state">불러오는 중...</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="card-title" style="margin-bottom:0">📋 신청 (드랍인 · 체험)</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="action-btn" onclick="changeAppDay(-1)" style="padding:2px 9px">‹</button>
+            <span id="app-day-label" style="font-size:13px;font-weight:600;min-width:120px;text-align:center"></span>
+            <button class="action-btn" onclick="changeAppDay(1)" style="padding:2px 9px">›</button>
+            <button class="action-btn" onclick="changeAppDay(0)" style="padding:2px 9px;font-size:11px">오늘</button>
+          </div>
+        </div>
+        <button class="action-btn" onclick="openPage('schedule-all');setTimeout(()=>openSubTab('schedule-all','applications'),50)" style="font-size:12px">신청 관리 →</button>
+      </div>
+      <div id="today-applications-list"><div class="empty-state">불러오는 중...</div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0">📢 업데이트 소식</div>
+        <div style="font-size:12px;color:#888">제목을 누르면 자세히 볼 수 있습니다</div>
+      </div>
+      <div id="patch-notes-list"></div>
+    </div>
+  </div>
+
+
+  <!-- 매출 관리 -->
+  <div id="page-revenue" class="page">
+    <div id="page-revenue-denied" class="sub-page">
+      <div class="card" style="text-align:center;padding:52px 20px">
+      <div style="font-size:34px">🔒</div>
+      <div style="margin-top:12px;font-size:16px;font-weight:600">열람 권한이 없습니다.</div>
+      <div style="margin-top:8px;font-size:13px;color:#888;line-height:1.7">이 화면은 관리자가 허용한 코치만 볼 수 있습니다.<br>필요하시면 관리자에게 요청해 주세요.</div>
+    </div>
+    </div>
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-perm="revenue.list" onclick="openInnerSubTab('page-revenue','list',this)">매출 내역</button>
+      <button class="sub-tab" data-perm="revenue.ledger" onclick="openInnerSubTab('page-revenue','stats',this);loadLedger()">가계부</button>
+    </div>
+    <div id="page-revenue-list" class="sub-page active">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <div class="card-title" style="margin:0">매출 관리</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="rev-month" onchange="renderRevenue()" style="padding:6px 10px;border:1px solid #e5e5e5;border-radius:6px;font-size:13px;background:#fff">
+            <option value="">전체 기간</option>
+          </select>
+          <button onclick="downloadRevenueExcel(this)" style="padding:6px 12px;border:1px solid #2e7d32;background:#2e7d32;color:#fff;border-radius:6px;font-size:13px;cursor:pointer;white-space:nowrap">엑셀 다운로드</button>
+          <input type="text" id="rev-search" placeholder="이름 검색..." oninput="renderRevenue()" style="padding:6px 10px;border:1px solid #e5e5e5;border-radius:6px;font-size:13px">
+          <select id="rev-filter-source" onchange="renderRevenue()" style="padding:6px 10px;border:1px solid #e5e5e5;border-radius:6px;font-size:13px;background:#fff">
+            <option value="">전체 구분</option>
+            <option value="회원등록">회원등록</option>
+            <option value="드랍인">드랍인</option>
+            <option value="락커">락커</option>
+            <option value="환불">환불</option>
+            <!-- 가계부에서 직접 등록한 매출 (구분이 가계부 항목 이름 그대로 잡힌다) -->
+            <option value="물품판매">물품판매</option>
+            <option value="기타">기타</option>
+          </select>
+          <select id="rev-filter-method" onchange="renderRevenue()" style="padding:6px 10px;border:1px solid #e5e5e5;border-radius:6px;font-size:13px;background:#fff">
+            <option value="">전체 결제수단</option>
+            <option value="현금">현금</option>
+            <option value="계좌이체">계좌이체</option>
+            <option value="카드">카드</option>
+            <option value="환불">환불</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 요약 -->
+      <div id="rev-summary" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="toggleRevenueSort('paid_at')" style="cursor:pointer;user-select:none;white-space:nowrap">결제일시 <span id="revsort-paid_at">↓</span></th>
+              <th>구분</th>
+              <th>이름</th>
+              <th onclick="toggleRevenueSort('amount')" style="cursor:pointer;user-select:none;white-space:nowrap">금액 <span id="revsort-amount">↕</span></th>
+              <th>결제수단</th>
+              <th>상세</th>
+            </tr>
+          </thead>
+          <tbody id="revenue-tbody"><tr><td colspan="6" class="empty-state">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+
+    <!-- 가계부: 왼쪽 매출(+) / 오른쪽 지출(-) / 아래 입력줄 -->
+    <div id="page-revenue-stats" class="sub-page">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <div class="card-title" style="margin:0">가계부</div>
+          <div class="ledger-period">
+            <button type="button" class="ledger-period-btn" onclick="toggleLedgerCalendar()">
+              기간: <span id="ledger-period-label">-</span>
+            </button>
+            <div class="ledger-cal" id="ledger-cal" hidden>
+              <div class="ledger-cal-head">
+                <button type="button" onclick="moveLedgerCalMonth(-1)" aria-label="이전 달">‹</button>
+                <span id="ledger-cal-title"></span>
+                <button type="button" onclick="moveLedgerCalMonth(1)" aria-label="다음 달">›</button>
+              </div>
+              <div class="ledger-cal-dow"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+              <div class="ledger-cal-grid" id="ledger-cal-grid"></div>
+              <div class="ledger-cal-foot">
+                <button type="button" class="ledger-cal-ghost" onclick="clearLedgerCalDay()">이 달 전체</button>
+                <button type="button" class="ledger-cal-ghost" onclick="pickLedgerAllTime()">전체 기간</button>
+                <button type="button" class="ledger-cal-ok" onclick="applyLedgerCalendar()">확인</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="ledger-summary" class="ledger-summary"></div>
+
+        <div class="ledger-columns">
+          <div class="ledger-col">
+            <div class="ledger-col-head ledger-col-head--in">
+              <span>매출 (+)</span><span id="ledger-income-total">0원</span>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>항목</th><th>건수</th><th style="text-align:right">금액</th></tr></thead>
+                <tbody id="ledger-income-tbody"><tr><td colspan="3" class="empty-state">불러오는 중...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="ledger-col">
+            <div class="ledger-col-head ledger-col-head--out">
+              <span>지출 (−)</span><span id="ledger-expense-total">0원</span>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>날짜</th><th>항목</th><th>내역</th><th style="text-align:right">금액</th><th></th></tr></thead>
+                <tbody id="ledger-expense-tbody"><tr><td colspan="5" class="empty-state">불러오는 중...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 입력줄: 구분 → 항목 → 금액 → 상세 → 고정비 → 등록 -->
+        <div class="ledger-form">
+          <details class="ledger-acc" id="ledger-acc-kind">
+            <summary><span id="ledger-kind-label">매출</span></summary>
+            <div class="ledger-acc-menu">
+              <button type="button" onclick="pickLedgerKind('매출')">매출</button>
+              <button type="button" onclick="pickLedgerKind('지출')">지출</button>
+            </div>
+          </details>
+
+          <details class="ledger-acc" id="ledger-acc-category">
+            <summary><span id="ledger-category-label">항목 선택</span></summary>
+            <div class="ledger-acc-menu" id="ledger-category-menu"></div>
+          </details>
+
+          <input type="number" id="ledger-amount" placeholder="금액" min="1" step="1" inputmode="numeric" class="ledger-amount">
+          <input type="text" id="ledger-detail" placeholder="상세 내역" maxlength="500" class="ledger-detail">
+
+          <label class="ledger-fixed">
+            <input type="checkbox" id="ledger-fixed">
+            <span>고정비로 등록 (매월)</span>
+          </label>
+
+          <button type="button" class="ledger-submit" onclick="addLedgerEntry(this)">등록</button>
+        </div>
+        <div id="ledger-form-error" class="ledger-error"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 회원 관리 (서브탭) -->
+  <div id="page-members" class="page">
+    <div id="member-sub-denied" class="sub-page">
+      <div class="card" style="text-align:center;padding:52px 20px">
+      <div style="font-size:34px">🔒</div>
+      <div style="margin-top:12px;font-size:16px;font-weight:600">열람 권한이 없습니다.</div>
+      <div style="margin-top:8px;font-size:13px;color:#888;line-height:1.7">이 화면은 관리자가 허용한 코치만 볼 수 있습니다.<br>필요하시면 관리자에게 요청해 주세요.</div>
+    </div>
+    </div>
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-perm="members.list" onclick="openMemberSubTab('list',this)">회원 목록</button>
+      <button class="sub-tab" data-perm="members.register" onclick="openMemberSubTab('register',this)">등록</button>
+      <button class="sub-tab" data-perm="members.contracts" onclick="openMemberSubTab('contracts',this)">📝 계약서</button>
+      <button class="sub-tab" data-perm="members.counts" onclick="openMemberSubTab('counts',this)">횟수권</button>
+      <button class="sub-tab" data-perm="members.holding" onclick="openMemberSubTab('holding',this)">홀딩</button>
+      <button class="sub-tab" data-perm="members.special" onclick="openMemberSubTab('special',this)">특별연장</button>
+      <button class="sub-tab" data-perm="members.pricing" onclick="openMemberSubTab('pricing',this)">가격표</button>
+    </div>
+    <div id="member-sub-list" class="sub-page active">
+    <div class="card">
+      <div class="search-row">
+        <input type="text" id="search-input" placeholder="이름 또는 연락처 검색..." oninput="filterMembers()">
+        <select id="filter-status" onchange="filterMembers()">
+          <option value="all">전체</option>
+          <option value="active">활성</option>
+          <option value="expiring">만료 임박</option>
+          <option value="inactive">만료</option>
+        </select>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th onclick="toggleSort('name')" style="cursor:pointer;user-select:none">회원명 <span id="sort-name">↕</span></th>
+            <th onclick="toggleSort('regcreated')" style="cursor:pointer;user-select:none">등록시각 / 결제 <span id="sort-regcreated">↕</span></th>
+            <th onclick="toggleSort('start')" style="cursor:pointer;user-select:none">시작일 <span id="sort-start">↕</span></th>
+            <th onclick="toggleSort('end')" style="cursor:pointer;user-select:none">만료일 <span id="sort-end">↕</span></th>
+            <th onclick="toggleFilter('locker')" style="cursor:pointer;user-select:none" id="th-locker">락커</th>
+            <th>보충자료 필요</th>
+            <th onclick="toggleFilter('status')" style="cursor:pointer;user-select:none" id="th-status">상태</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody id="member-tbody"><tr><td colspan="8" class="empty-state">불러오는 중...</td></tr></tbody>
+      </table>
+    </div>
+    </div>
+    <div id="member-sub-register" class="sub-page">
+    <div class="card" style="max-width:720px">
+      <div class="card-title">회원 등록</div>
+      <div class="tabs-inline">
+        <button class="tab-sm active" onclick="setRegType(this,'new')">신규 등록</button>
+        <button class="tab-sm" onclick="setRegType(this,'renew')">재등록</button>
+      </div>
+
+      <!-- 신규/재등록 공통 -->
+      <div id="reg-new">
+        <div class="form-grid">
+          <div class="form-group"><label>회원명 *</label><input type="text" id="reg-name" placeholder="홍길동"></div>
+          <div class="form-group"><label>연락처</label><input type="text" id="reg-phone" placeholder="010-0000-0000"></div>
+          <div class="form-group"><label>성별</label><select id="reg-gender"><option value="">선택</option><option value="남">남</option><option value="여">여</option></select></div>
+          <div class="form-group"><label>연령대</label><select id="reg-age"><option value="10대">10대</option><option value="20대">20대</option><option value="30대" selected>30대</option><option value="40대">40대</option><option value="50대">50대</option></select></div>
+          <div class="form-group"><label>요금제</label><select id="reg-plan" onchange="calcPrice()"><option value="">선택...</option></select></div>
+          <div class="form-group"><label>기간</label>
+            <select id="reg-period" onchange="onPeriodChange()"><option value="">선택...</option><option value="1">1개월</option><option value="3">3개월</option><option value="6">6개월</option><option value="custom">만료일 직접입력</option></select>
+          </div>
+          <div class="form-group"><label>결제 수단</label><select id="reg-payment"><option value="카드">카드</option><option value="계좌이체">계좌이체</option><option value="현금">현금</option></select></div>
+          <div class="form-group"><label>할인율</label><select id="reg-discount" onchange="calcPrice()"><option value="0">없음</option><option value="0.01">1% (지인소개)</option><option value="0.05">5% (출석이벤트)</option><option value="0.1">10% (직업할인)</option></select></div>
+          <div class="form-group"><label>시작일</label><input type="date" id="reg-start" onchange="calcEndDate()"></div>
+          <div class="form-group"><label>만료일</label><input type="date" id="reg-end" readonly style="background:#f9f9f9"></div>
+          <div class="form-group"><label>홀딩 부여 (일)</label><input type="number" id="reg-holding" value="0" min="0" title="3개월=10일, 6개월=30일 자동"></div>
+          <div class="form-group"><label>지역</label><input type="text" id="reg-region" placeholder="군자동"></div>
+          <div class="form-group"><label>가입 경로</label><select id="reg-source"><option>인스타</option><option>네이버</option><option>지인</option><option>기존</option><option>오프라인</option></select></div>
+          <div class="form-group"><label>생년월일</label><input type="date" id="reg-birth"></div>
+          <div class="form-group"><label>인스타그램</label><input type="text" id="reg-insta" placeholder="@아이디"></div>
+          <div class="form-group form-full"><label>운동 방향성</label><input type="text" id="reg-goal" placeholder="다이어트, 체력 증진 등"></div>
+          <div class="form-group form-full"><label>부상/특이사항</label><input type="text" id="reg-injury" placeholder="허리, 무릎 등"></div>
+          <div class="form-group form-full"><label>메모</label><textarea id="reg-memo" class="memo-box" rows="4" placeholder="누적 개월, 특이사항 등 (줄바꿈 가능)"></textarea></div>
+          <div class="form-group form-full">
+            <label>회원권 금액</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="price-display" id="price-display" style="flex:1">-</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span style="font-size:11px;color:#888">직접입력</span>
+                <input type="number" id="reg-amount-custom" placeholder="금액" style="width:120px;font-size:13px" oninput="onAmountCustomInput()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 락커 동시 등록 -->
+        <div class="section-box">
+          <div class="section-box-title">
+            <input type="checkbox" class="toggle-check" id="locker-toggle" onchange="toggleSection('locker-section', this.checked); if(this.checked) initRegLocker(); updateRegTotal();">
+            🔒 락커 동시 등록
+          </div>
+          <div id="locker-section" style="display:none">
+            <div class="form-grid">
+              <div class="form-group"><label>락커 번호</label><input type="number" id="reg-locker-id" placeholder="예: 22" min="1" max="152"></div>
+              <div class="form-group"><label>개월수</label><input type="number" id="reg-locker-months" placeholder="기간과 동일" min="1" oninput="calcRegLockerAmount()"></div>
+              <div class="form-group"><label>금액</label><input type="number" id="reg-locker-amount" placeholder="5000" oninput="updateRegTotal()"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 총 최종 금액 (회원권 + 락커) -->
+        <div id="reg-total-box" style="display:none;margin-top:14px;background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:14px 16px">
+          <div id="reg-total-breakdown" style="font-size:13px;color:#777;margin-bottom:8px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:14px;font-weight:600;color:#555">총 최종 금액</span>
+            <span id="reg-total-amount" style="font-size:22px;font-weight:700;color:#e65100">-</span>
+          </div>
+        </div>
+
+        <button class="submit-btn" onclick="submitMember('new')">등록 완료</button>
+      </div>
+
+      <!-- 재등록 검색 -->
+      <div id="reg-renew" style="display:none">
+        <div class="form-group form-full" style="margin-bottom:16px">
+          <label>회원 검색</label>
+          <input type="text" id="renew-search" placeholder="이름 입력..." oninput="searchRenewMember()">
+          <div id="renew-search-result" style="margin-top:6px"></div>
+        </div>
+        <div id="renew-selected" style="display:none">
+          <div style="background:#f9fdf9;border:1px solid #a5d6a7;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px">
+            <div style="font-weight:600;margin-bottom:6px" id="renew-member-name"></div>
+            <div style="color:#888;display:grid;grid-template-columns:1fr 1fr;gap:4px" id="renew-member-info"></div>
+          </div>
+          <div id="renew-facility-status" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px"></div>
+          <div class="form-grid">
+            <div class="form-group"><label>요금제</label><select id="renew-plan" onchange="calcRenewPrice()"><option value="">선택...</option></select></div>
+            <div class="form-group"><label>기간</label>
+              <select id="renew-period" onchange="onRenewPeriodChange()"><option value="">선택...</option><option value="1">1개월</option><option value="3">3개월</option><option value="6">6개월</option><option value="custom">만료일 직접입력</option></select>
+            </div>
+            <div class="form-group"><label>결제 수단</label><select id="renew-payment"><option>카드</option><option>계좌이체</option><option>현금</option></select></div>
+            <div class="form-group"><label>할인율</label><select id="renew-discount" onchange="calcRenewPrice()"><option value="0">없음</option><option value="0.01">1% (지인소개)</option><option value="0.05">5% (출석이벤트)</option><option value="0.1">10% (직업할인)</option></select></div>
+            <div class="form-group"><label>시작일</label><input type="date" id="renew-start" onchange="calcRenewEndDate()"></div>
+            <div class="form-group"><label>만료일</label><input type="date" id="renew-end" readonly style="background:#f9f9f9" onchange="syncRenewLockerMonths()"></div>
+            <div class="form-group"><label>홀딩 부여 (일)</label><input type="number" id="renew-holding" value="0" min="0" title="3개월=10일, 6개월=30일 자동"></div>
+            <div class="form-group form-full"><label>메모 <span style="font-weight:400;color:#888;font-size:11px">— 이전 메모가 자동으로 채워집니다. 이어서 적으세요</span></label><textarea id="renew-memo" class="memo-box" rows="5" placeholder="누적 개월, 특이사항 등 (줄바꿈 가능)"></textarea></div>
+            <div class="form-group form-full">
+              <label>최종 금액</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div class="price-display" id="renew-price-display" style="flex:1">-</div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:11px;color:#888">직접입력</span>
+                  <input type="number" id="renew-amount-custom" placeholder="금액" style="width:120px;font-size:13px" oninput="onRenewAmountCustomInput()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 락커 동시 등록/연장 -->
+          <div class="section-box">
+            <div class="section-box-title">
+              <input type="checkbox" class="toggle-check" id="renew-locker-toggle" onchange="toggleSection('renew-locker-section', this.checked); if(this.checked) initRenewLocker();">
+              🔒 락커 등록/연장
+            </div>
+            <div id="renew-locker-section" style="display:none">
+              <div class="form-grid">
+                <div class="form-group"><label>락커 번호</label><input type="number" id="renew-locker-id" placeholder="예: 22" min="1" max="152"></div>
+                <div class="form-group"><label>개월수</label><input type="number" id="renew-locker-months" placeholder="기간과 동일" min="1" oninput="calcRenewLockerAmount()"></div>
+                <div class="form-group"><label>금액</label><input type="number" id="renew-locker-amount" placeholder="5000"></div>
+              </div>
+            </div>
+          </div>
+
+          <button class="submit-btn" onclick="submitRenew()">재등록 완료</button>
+        </div>
+      </div>
+
+    </div>
+    </div>
+    <div id="member-sub-contracts" class="sub-page">
+      <div class="card">
+        <div class="card-title">📝 제출된 계약서</div>
+        <div class="detail-notice">태블릿에서 회원이 작성한 가입 신청서입니다. "이 내용으로 등록"을 누르면 등록 폼에 자동으로 채워집니다.</div>
+        <table>
+          <thead><tr><th>제출 시각</th><th>이름</th><th>연락처</th><th>생년월일</th><th>방향성</th><th>요금제</th><th>사진</th><th>상태</th><th>관리</th></tr></thead>
+          <tbody id="contracts-tbody"><tr><td colspan="9" class="empty-state">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="member-sub-counts" class="sub-page">
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:0">횟수권 현황</div>
+        <button class="add-btn" onclick="toggleCountRegister()" id="ct-toggle-btn">+ 횟수권 등록</button>
+      </div>
+      <table id="counts-table">
+        <thead>
+          <tr><th>회원명</th><th>연락처</th><th>잔여 횟수</th><th>사용 횟수</th><th>등록일</th><th>금액</th><th>관리</th></tr>
+        </thead>
+        <tbody id="counts-tbody"><tr><td colspan="7" class="empty-state">불러오는 중...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card" id="ct-register-card" style="display:none">
+      <div class="card-title">횟수권 등록</div>
+      <div class="detail-notice">횟수권은 만료일이 아닌 <b>잔여 횟수</b>로 관리됩니다.</div>
+      <div class="form-grid">
+        <div class="form-group"><label>회원명 *</label><input type="text" id="ct-name"></div>
+        <div class="form-group"><label>연락처</label><input type="text" id="ct-phone" placeholder="010-0000-0000"></div>
+        <div class="form-group"><label>성별</label><select id="ct-gender"><option value="">선택</option><option value="남">남</option><option value="여">여</option></select></div>
+        <div class="form-group"><label>연령대</label><select id="ct-age"><option value="10대">10대</option><option value="20대">20대</option><option value="30대" selected>30대</option><option value="40대">40대</option><option value="50대">50대</option><option value="60대">60대</option></select></div>
+        <div class="form-group"><label>총 횟수 *</label><input type="number" id="ct-count" placeholder="예: 10" min="1"></div>
+        <div class="form-group"><label>금액</label><input type="number" id="ct-amount" placeholder="예: 300000"></div>
+        <div class="form-group"><label>결제 수단</label><select id="ct-payment"><option>카드</option><option>계좌이체</option><option>현금</option></select></div>
+        <div class="form-group"><label>등록일 *</label><input type="date" id="ct-start"></div>
+        <div class="form-group"><label>가입 경로</label><select id="ct-source"><option>인스타</option><option>네이버</option><option>지인</option><option>기존</option><option>오프라인</option></select></div>
+        <div class="form-group"><label>지역</label><input type="text" id="ct-region" placeholder="군자동"></div>
+        <div class="form-group"><label>생년월일</label><input type="date" id="ct-birth"></div>
+        <div class="form-group"><label>인스타그램</label><input type="text" id="ct-insta" placeholder="@아이디"></div>
+        <div class="form-group form-full"><label>운동 방향성</label><input type="text" id="ct-goal" placeholder="다이어트, 체력 증진 등"></div>
+        <div class="form-group form-full"><label>부상/특이사항</label><input type="text" id="ct-injury" placeholder="허리, 무릎 등"></div>
+        <div class="form-group form-full"><label>메모</label><input type="text" id="ct-memo"></div>
+      </div>
+      <button class="submit-btn" onclick="submitCount()">횟수권 등록</button>
+    </div>
+    </div>
+    <div id="member-sub-holding" class="sub-page">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">홀딩 등록</div>
+      <div class="form-grid">
+        <div class="form-group form-full"><label>회원 검색</label><input type="text" id="hold-search" placeholder="이름 입력..." oninput="searchHoldMember()"><div id="hold-search-result" style="margin-top:6px"></div></div>
+        <div class="form-group"><label>시작일 *</label><input type="date" id="hold-start"></div>
+        <div class="form-group"><label>종료일 *</label><input type="date" id="hold-end"></div>
+      </div>
+      <button class="submit-btn" onclick="submitHolding()">홀딩 적용</button>
+    </div>
+
+    <div class="card">
+      <div class="search-row">
+        <input type="text" id="holding-search" placeholder="회원 이름 검색..." oninput="filterHoldingList()">
+        <select id="holding-filter-status" onchange="filterHoldingList()">
+          <option value="all">전체</option>
+          <option value="approved">적용됨</option>
+          <option value="upcoming">예정</option>
+        </select>
+      </div>
+      <table>
+        <thead><tr><th>회원명</th><th>날짜</th><th>신청일</th><th>관리</th></tr></thead>
+        <tbody id="holding-tbody"><tr><td colspan="4" class="empty-state">불러오는 중...</td></tr></tbody>
+      </table>
+    </div>
+    </div>
+    <div id="member-sub-special" class="sub-page">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">특별 연장 등록</div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:16px;line-height:1.6">
+        ℹ️ 부상·출장 등 예외 상황에서 회원이 부여받은 홀딩 일수를 차감하지 않고 만료일을 연장합니다.
+      </div>
+      <div class="form-grid">
+        <div class="form-group form-full"><label>회원 검색</label><input type="text" id="special-search" placeholder="이름 입력..." oninput="searchSpecialMember()"><div id="special-search-result" style="margin-top:6px"></div></div>
+        <div class="form-group"><label>시작일 *</label><input type="date" id="special-start"></div>
+        <div class="form-group"><label>종료일 *</label><input type="date" id="special-end"></div>
+        <div class="form-group form-full"><label>사유</label><input type="text" id="special-reason" placeholder="부상, 출장 등"></div>
+      </div>
+      <button class="submit-btn" onclick="submitSpecialExtension()">특별 연장 적용</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">특별 연장 내역</div>
+      <table>
+        <thead><tr><th>회원명</th><th>기간</th><th>사유</th><th>관리</th></tr></thead>
+        <tbody id="special-tbody"><tr><td colspan="4" class="empty-state">불러오는 중...</td></tr></tbody>
+      </table>
+    </div>
+    </div>
+    <div id="member-sub-pricing" class="sub-page">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:0">요금제 가격표</div>
+        <button class="add-btn" onclick="openAddPricingModal()">+ 요금제 추가</button>
+      </div>
+      <table id="pricing-table">
+        <thead><tr><th>요금제</th><th>기간</th><th>금액</th><th>레이블</th><th>관리</th></tr></thead>
+        <tbody id="pricing-tbody"><tr><td colspan="5" class="empty-state">불러오는 중...</td></tr></tbody>
+      </table>
+    </div>
+    </div>
+  </div>
+
+  <!-- 락커/운동복 (서브탭) -->
+  <div id="page-locker-uniform" class="page">
+    <div class="sub-tabs" id="lu-top-tabs">
+      <button class="sub-tab active" onclick="openLU('locker',this)">락커</button>
+    </div>
+
+    <!-- 락커 -->
+    <div id="locker-inner" class="sub-page active">
+      <div class="sub-tabs" style="border-bottom:1px solid #e5e5e5;margin-bottom:16px">
+        <button class="sub-tab active" onclick="openInnerSubTab('locker-inner','map',this)">락커 현황</button>
+        <button class="sub-tab" onclick="openInnerSubTab('locker-inner','history',this);loadLockerHistory()">배정/반납 이력</button>
+      </div>
+      <div id="locker-inner-map" class="sub-page active">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div class="locker-legend">
+              <span><span class="legend-dot" style="background:#e8f5e9;border:1px solid #a5d6a7"></span>사용 중</span>
+              <span><span class="legend-dot" style="background:#e3f2fd;border:1px solid #90caf9"></span>스태프</span>
+              <span><span class="legend-dot" style="background:#f5f5f5;border:1px solid #e5e5e5"></span>비어있음</span>
+            </div>
+            <div style="font-size:12px;color:#888" id="locker-count-text"></div>
+          </div>
+          <div class="locker-wrap">
+            <div class="locker-grid" id="locker-grid"></div>
+          </div>
+          <div class="locker-info" id="locker-info">락커를 클릭하면 정보가 표시됩니다</div>
+        </div>
+      </div>
+      <div id="locker-inner-history" class="sub-page">
+        <div class="card"><table>
+          <thead><tr><th>날짜/시간</th><th>락커번호</th><th>회원명</th><th>구분</th><th>시작일</th><th>만료일</th><th>금액</th><th>관리</th></tr></thead>
+          <tbody id="locker-history-tbody"><tr><td colspan="8" class="empty-state">불러오는 중...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- 운동복 -->
+    <div id="uniform-inner" class="sub-page">
+      <div class="sub-tabs" style="border-bottom:1px solid #e5e5e5;margin-bottom:16px">
+        <button class="sub-tab active" onclick="openInnerSubTab('uniform-inner','list',this)">대여 현황</button>
+        <button class="sub-tab" onclick="openInnerSubTab('uniform-inner','history',this);loadUniformHistory()">등록/반납 이력</button>
+      </div>
+      <div id="uniform-inner-list" class="sub-page active">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div class="card-title" style="margin-bottom:0">운동복 대여 현황</div>
+            <button class="add-btn" onclick="openUniformModal()">+ 대여 등록</button>
+          </div>
+          <table>
+            <thead><tr><th>#</th><th>회원명</th><th>시작일</th><th>만료일</th><th>개월</th><th>금액</th><th>상태</th><th>관리</th></tr></thead>
+            <tbody id="uniform-tbody"><tr><td colspan="8" class="empty-state">불러오는 중...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="uniform-inner-history" class="sub-page">
+        <div class="card"><table>
+          <thead><tr><th>날짜/시간</th><th>회원명</th><th>구분</th><th>시작일</th><th>만료일</th><th>개월</th><th>금액</th><th>관리</th></tr></thead>
+          <tbody id="uniform-history-tbody"><tr><td colspan="8" class="empty-state">불러오는 중...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시간표/신청 (서브탭) -->
+  <div id="page-schedule-all" class="page">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="openSubTab('schedule-all','schedule')">수업 시간표</button>
+      <button class="sub-tab" onclick="openSubTab('schedule-all','templates')">반복 템플릿</button>
+      <button class="sub-tab" onclick="openSubTab('schedule-all','applications')">신청 관리</button>
+      <button class="sub-tab" onclick="openSubTab('schedule-all','calendar')">공지 캘린더</button>
+    </div>
+    <div id="schedule-all-sub-schedule" class="sub-page active">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="action-btn" onclick="changeScheduleMonth(-1)">‹</button>
+            <span style="font-size:15px;font-weight:600" id="schedule-month-label"></span>
+            <button class="action-btn" onclick="changeScheduleMonth(1)">›</button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="action-btn" onclick="generateMonth()">반복일정 채우기</button>
+            <button class="action-btn danger" onclick="deleteMonthEvents()" style="color:#c62828;border-color:#ffcdd2">🗑 이번 달 전체 삭제</button>
+            <button class="add-btn" onclick="openEventModal(null,null)">+ 단일 일정 추가</button>
+          </div>
+        </div>
+        <div id="schedule-calendar" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
+      </div>
+    </div>
+    <div id="schedule-all-sub-templates" class="sub-page">
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="card-title" style="margin-bottom:0">반복 수업 템플릿</div>
+          <div style="display:flex;gap:8px">
+            <button class="add-btn" onclick="openTemplateModal(null)">+ 템플릿 추가</button>
+            <button class="action-btn" onclick="openBulkTemplateModal()" style="padding:8px 14px">⚡ 일괄 추가</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>수업명</th><th>요일</th><th>시간</th><th>색상</th><th>상태</th><th>관리</th></tr></thead>
+          <tbody id="templates-tbody"><tr><td colspan="6" class="empty-state">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="schedule-all-sub-applications" class="sub-page">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="card-title" style="margin-bottom:0">신청 내역</div>
+          <div style="display:flex;gap:8px">
+            <button class="tab-sm active" id="app-tab-all" onclick="filterApplications('all')">전체</button>
+            <button class="tab-sm" id="app-tab-체험" onclick="filterApplications('체험')">체험</button>
+            <button class="tab-sm" id="app-tab-드랍인" onclick="filterApplications('드랍인')">드랍인</button>
+          </div>
+        </div>
+        <div class="search-row">
+          <input type="text" id="app-search" placeholder="이름 또는 연락처 검색..." oninput="renderApplications()">
+          <select id="app-filter-status" onchange="renderApplications()">
+            <option value="all">전체 상태</option>
+            <option value="pending">대기</option>
+            <option value="confirmed">확인</option>
+            <option value="done">완료</option>
+            <option value="registered">등록</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>구분</th><th>이름</th><th>연락처</th><th onclick="toggleAppSort('preferred_date')" style="cursor:pointer;user-select:none;white-space:nowrap">희망일 <span id="appsort-preferred_date">↑</span></th><th>희망 수업</th><th>메모</th><th onclick="toggleAppSort('created_at')" style="cursor:pointer;user-select:none;white-space:nowrap">신청 시각 <span id="appsort-created_at">↕</span></th><th>결제 (드랍인)</th><th>상태</th><th>관리</th></tr></thead>
+          <tbody id="applications-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="schedule-all-sub-calendar" class="sub-page">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="action-btn" onclick="changeCalendarMonth(-1)">‹</button>
+            <span style="font-size:15px;font-weight:600" id="calendar-month-label"></span>
+            <button class="action-btn" onclick="changeCalendarMonth(1)">›</button>
+          </div>
+          <button class="add-btn" onclick="openCalEventModal(null,null)">+ 일정 추가</button>
+        </div>
+        <div style="margin-bottom:8px">
+          <span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#c62828;display:inline-block"></span>휴관일</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#1565c0;display:inline-block"></span>오픈짐</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#e65100;display:inline-block"></span>이벤트</span>
+        </div>
+        <div id="admin-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WOD 관리 -->
+  <div id="page-wod" class="page">
+    <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div class="card-title" style="margin-bottom:4px">🛠️ WOD 빌더</div>
+        <div style="font-size:13px;color:#888">클릭·드래그로 WOD를 짜고 텍스트를 복사해 아래 등록 칸에 붙여넣으세요.</div>
+      </div>
+      <a href="/wod-builder" target="_blank" class="add-btn" style="text-decoration:none">빌더 열기 ↗</a>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">WOD 등록 / 수정</div>
+      <div class="detail-notice">날짜당 WOD 1개입니다. 같은 날짜로 저장하면 덮어쓰기됩니다. 공개 시간을 지정하면 그 시각 이후에 회원에게 공개됩니다.</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>날짜 *</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button type="button" onclick="changeWodDay(-1)" style="padding:6px 10px;border:1px solid #e5e5e5;border-radius:6px;background:#fff;cursor:pointer;font-size:14px">&#9664;</button>
+            <input type="date" id="wod-date" onchange="loadWodForDate()" style="flex:1">
+            <button type="button" onclick="changeWodDay(1)" style="padding:6px 10px;border:1px solid #e5e5e5;border-radius:6px;background:#fff;cursor:pointer;font-size:14px">&#9654;</button>
+          </div>
+          <div id="wod-day-label" style="margin-top:4px;font-size:12px;color:#888"></div>
+        </div>
+        <div class="form-group">
+          <label>공개 날짜/시간</label>
+          <div style="display:flex;gap:6px">
+            <input type="date" id="wod-publish-date" style="flex:1">
+            <input type="time" id="wod-publish-time" style="width:110px">
+          </div>
+        </div>
+        <div class="form-group form-full"><label>제목 (선택)</label><input type="text" id="wod-title" placeholder="예: Hero WOD - Murph"></div>
+        <div class="form-group form-full"><label>내용 *</label><textarea id="wod-content" rows="8" placeholder="WOD 내용을 입력하세요" style="width:100%;padding:12px;background:#fff;border:1px solid #e5e5e5;border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical"></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="submit-btn" onclick="submitWod()">저장</button>
+        <button class="action-btn danger" id="wod-delete-btn" onclick="deleteWod()" style="display:none">삭제</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">등록된 WOD</div>
+      <table>
+        <thead><tr><th>날짜</th><th>제목</th><th>공개 시간</th><th>관리</th></tr></thead>
+        <tbody id="wod-tbody"><tr><td colspan="4" class="empty-state">불러오는 중...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 공지 관리 -->
+  <div id="page-notices" class="page">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0">공지사항 관리</div>
+        <button class="add-btn" onclick="openNoticeModal()">+ 공지 추가</button>
+      </div>
+      <div class="detail-notice">상단 고정(📌)된 공지가 메인페이지 맨 위에 표시됩니다.</div>
+      <table>
+        <thead><tr><th style="width:40px"></th><th>제목</th><th>내용</th><th style="width:110px">작성일</th><th style="width:120px">관리</th></tr></thead>
+        <tbody id="notices-tbody"><tr><td colspan="5" class="empty-state">불러오는 중...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 문자 발송 (서브탭) -->
+  <div id="page-sms" class="page">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="openSubTab('sms','logs')">발송 내역</button>
+      <button class="sub-tab" onclick="openSubTab('sms','templates')">템플릿 관리</button>
+    </div>
+
+    <!-- 발송 내역 -->
+    <div id="sms-sub-logs" class="sub-page active">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="display:flex;gap:8px">
+            <button class="tab-sm active" id="sms-log-tab-all" onclick="filterSmsLogs('all')">전체</button>
+            <button class="tab-sm" id="sms-log-tab-체험" onclick="filterSmsLogs('체험')">체험</button>
+            <button class="tab-sm" id="sms-log-tab-드랍인" onclick="filterSmsLogs('드랍인')">드랍인</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>발송시각</th><th>구분</th><th>수신자</th><th>연락처</th><th>내용</th><th>상태</th></tr></thead>
+          <tbody id="sms-logs-tbody"><tr><td colspan="6" class="empty-state">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 템플릿 관리 -->
+    <div id="sms-sub-templates" class="sub-page">
+      <div class="card">
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="tab-sm active" id="sms-tpl-tab-체험" onclick="filterSmsTemplates('체험')">체험</button>
+          <button class="tab-sm" id="sms-tpl-tab-드랍인" onclick="filterSmsTemplates('드랍인')">드랍인</button>
+        </div>
+        <div class="section-two">
+          <div>
+            <div class="card-title">저장된 템플릿</div>
+            <div id="sms-templates-list"><div class="empty-state">불러오는 중...</div></div>
+          </div>
+          <div>
+            <div class="card-title">미리보기</div>
+            <input type="hidden" id="sms-tpl-id">
+            <div class="form-group" style="margin-bottom:12px"><label>템플릿 제목</label><input type="text" id="sms-tpl-title" placeholder="예: 체험 안내 문자"></div>
+            <div class="phone-mockup">
+              <div class="phone-speaker"></div>
+              <div class="phone-screen">
+                <div class="phone-bubble" id="sms-tpl-preview">문자 내용을 입력하세요</div>
+              </div>
+            </div>
+            <div class="form-group" style="margin:12px 0 4px"><label>문자 내용</label><textarea id="sms-tpl-content" rows="5" oninput="onSmsTplContentInput()" style="width:100%;padding:12px;background:#fff;border:1px solid #e5e5e5;border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical"></textarea></div>
+            <div style="font-size:11px;color:#888;margin-bottom:12px" id="sms-tpl-bytecount">0 / 90 byte</div>
+            <div style="display:flex;gap:8px">
+              <button class="submit-btn" style="margin-top:0" onclick="saveSmsTemplate()">저장</button>
+              <button class="action-btn danger" id="sms-tpl-delete-btn" onclick="deleteSmsTemplate()" style="display:none">삭제</button>
+              <button class="action-btn" style="margin-left:auto" onclick="newSmsTemplate()">+ 새 템플릿</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- 계약서 상세 모달 -->
+<!-- 공지 추가/수정 모달 -->
+<!-- 락커 이력 수정 모달 -->
+<div class="modal-bg" id="locker-history-modal">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><span>락커 이력 수정</span><button class="modal-close" onclick="closeModal('locker-history-modal')">✕</button></div>
+    <input type="hidden" id="lh-id">
+    <div class="form-group" style="margin-bottom:12px"><label>회원명</label><input type="text" id="lh-member"></div>
+    <div class="grid2" style="margin-bottom:12px">
+      <div class="form-group"><label>시작일</label><input type="date" id="lh-start"></div>
+      <div class="form-group"><label>만료일</label><input type="date" id="lh-end"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px"><label>금액 (환불은 음수)</label><input type="number" id="lh-amount"></div>
+    <button class="submit-btn" onclick="submitLockerHistory()">저장</button>
+  </div>
+</div>
+
+<!-- 가계부 매출 덩어리 내역 모달 -->
+<div class="modal-bg" id="ledger-group-modal">
+  <div class="modal" style="width:560px">
+    <div class="modal-title"><span id="ledger-group-title">내역</span><button class="modal-close" onclick="closeModal('ledger-group-modal')">✕</button></div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>날짜</th><th>항목</th><th>내역</th><th style="text-align:right">금액</th><th></th></tr></thead>
+        <tbody id="ledger-group-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="notice-modal">
+  <div class="modal" style="width:480px">
+    <div class="modal-title"><span id="notice-modal-title">공지 추가</span><button class="modal-close" onclick="closeModal('notice-modal')">✕</button></div>
+    <input type="hidden" id="notice-id">
+    <div class="form-group" style="margin-bottom:12px"><label>제목 *</label><input type="text" id="notice-title" placeholder="공지 제목"></div>
+    <div class="form-group" style="margin-bottom:12px"><label>내용</label><textarea id="notice-content" rows="6" placeholder="공지 내용" style="width:100%;padding:12px;background:#fff;border:1px solid #e5e5e5;border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical"></textarea></div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:16px;font-size:14px">
+      <input type="checkbox" id="notice-pinned" style="width:16px;height:16px"> 📌 상단 고정 (메인페이지 맨 위 표시)
+    </label>
+    <button class="submit-btn" onclick="submitNotice()">저장</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="contract-modal">
+  <div class="modal" style="width:520px">
+    <div class="modal-title"><span>계약서 상세</span><button class="modal-close" onclick="closeModal('contract-modal')">✕</button></div>
+    <div id="contract-detail"></div>
+  </div>
+</div>
+
+<!-- WOD 빌더 동작 선택 모달 자리 -->
+<!-- 첫 로그인 비밀번호 변경 (코치가 전화번호 뒷 4자리를 그대로 쓰고 있을 때 강제로 뜬다) -->
+<div class="modal-bg" id="pw-change-modal" style="z-index:400">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><span>비밀번호를 바꿔주세요</span><button class="modal-close" onclick="closePwChange()">✕</button></div>
+    <div class="detail-notice" style="margin-bottom:14px;line-height:1.7">
+      지금 비밀번호는 <b>전화번호 뒷 4자리</b>입니다. 숫자 네 자리는 남이 맞히기 쉬워서,
+      매출·회원 정보가 보이는 이 화면에는 위험합니다.<br>
+      <span style="color:#888">바꾸지 않고 닫으면 다음에 들어올 때 다시 뜹니다.</span>
+    </div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>현재 비밀번호 (전화번호 뒷 4자리)</label><input type="password" id="pw-current" autocomplete="off"></div>
+      <div class="form-group form-full"><label>새 비밀번호</label><input type="password" id="pw-new" autocomplete="new-password" placeholder="8자 이상, 영소문자와 숫자 포함"></div>
+      <div class="form-group form-full"><label>새 비밀번호 확인</label><input type="password" id="pw-new2" autocomplete="new-password" onkeydown="if(event.key==='Enter')submitPwChange()"></div>
+    </div>
+    <div id="pw-change-error" style="color:#c62828;font-size:13px;min-height:18px;margin-bottom:8px"></div>
+    <button class="submit-btn" onclick="submitPwChange()">비밀번호 변경</button>
+  </div>
+</div>
+
+<!-- 환불 처리 모달 (락커/회원권 공용) -->
+<div class="modal-bg" id="refund-modal" style="z-index:300">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><span id="refund-modal-title">환불 처리</span><button class="modal-close" onclick="closeModal('refund-modal')">✕</button></div>
+    <div class="detail-notice" id="refund-info" style="margin-bottom:12px"></div>
+    <div id="refund-linked" style="display:none;background:#f0f7ff;border:1px solid #bbdefb;border-radius:8px;padding:10px 12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:600;color:#1565c0;margin-bottom:8px">함께 반납·환불</div>
+      <label id="refund-locker-row" style="display:none;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="refund-locker-check" onchange="recalcRefundTotal()"> <span id="refund-locker-label"></span>
+      </label>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>환불일</label><input type="date" id="refund-date"></div>
+      <div class="form-group"><label>환불 금액 (원)</label><input type="number" id="refund-amount" min="0" placeholder="0" oninput="onRefundAmountInput()"></div>
+      <div class="form-group form-full"><label>메모 (선택)</label><input type="text" id="refund-memo" placeholder="환불 사유 등"></div>
+    </div>
+    <div style="font-size:12px;color:#888;margin:6px 0 12px" id="refund-calc-hint"></div>
+    <button class="submit-btn" onclick="submitRefund()">환불 처리 완료</button>
+  </div>
+</div>
+
+<!-- 가격표 추가 모달 -->
+<div class="modal-bg" id="pricing-modal">
+  <div class="modal" style="width:400px">
+    <div class="modal-title"><span>요금제 추가</span><button class="modal-close" onclick="closeModal('pricing-modal')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>요금제명</label><input type="text" id="pm-plan" placeholder="예: Grove 신규"></div>
+      <div class="form-group"><label>기간 (개월)</label><input type="number" id="pm-period" placeholder="3" min="1"></div>
+      <div class="form-group form-full"><label>금액</label><input type="number" id="pm-amount" placeholder="450000"></div>
+      <div class="form-group form-full"><label>레이블 (선택)</label><input type="text" id="pm-label" placeholder="예: Grove 신규 3개월"></div>
+    </div>
+    <button class="submit-btn" onclick="submitAddPricing()">추가 완료</button>
+  </div>
+</div>
+
+<!-- 횟수권 모달 -->
+<div class="modal-bg" id="count-modal">
+  <div class="modal" style="width:560px">
+    <div class="modal-title">
+      <span id="count-modal-title">횟수권 관리</span>
+      <button class="modal-close" onclick="closeModal('count-modal')">✕</button>
+    </div>
+    <div id="count-modal-content"></div>
+  </div>
+</div>
+
+<!-- 회원 상세 모달 -->
+<div class="modal-bg" id="member-modal">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-name">회원 상세</span><button class="modal-close" onclick="closeModal('member-modal')">✕</button></div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- 회원 메시지 보내기 모달 -->
+<div class="modal-bg" id="message-modal">
+  <div class="modal" style="width:480px">
+    <div class="modal-title"><span>메시지 보내기 — <span id="msg-target-name"></span></span><button class="modal-close" onclick="closeModal('message-modal')">✕</button></div>
+    <input type="hidden" id="msg-target-id">
+    <div class="form-group" style="margin-bottom:12px">
+      <label>메시지 내용</label>
+      <textarea id="msg-content" rows="4" placeholder="회원에게 전달할 메시지를 입력하세요" style="width:100%;padding:12px;background:#fff;border:1px solid #e5e5e5;border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical"></textarea>
+    </div>
+    <div style="font-size:12px;color:#888;margin-bottom:16px">회원이 로그인 시 한 번만 확인할 수 있으며, 발송 후 48시간이 지나면 자동으로 사라집니다.</div>
+    <button class="submit-btn" onclick="submitMessage()">보내기</button>
+  </div>
+</div>
+
+<!-- 회원 메시지 이력 모달 -->
+<div class="modal-bg" id="message-history-modal">
+  <div class="modal" style="width:520px">
+    <div class="modal-title"><span id="msg-history-title">메시지 이력</span><button class="modal-close" onclick="closeModal('message-history-modal')">✕</button></div>
+    <div id="msg-history-list"></div>
+  </div>
+</div>
+
+<!-- 신청 메모 모달 -->
+<div class="modal-bg" id="app-memo-modal">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><span>메모</span><button class="modal-close" onclick="closeModal('app-memo-modal')">✕</button></div>
+    <div id="app-memo-content" style="white-space:pre-wrap;word-break:break-word;font-size:14px;color:#333;line-height:1.5"></div>
+  </div>
+</div>
+
+<!-- 문자 발송 내역 내용 모달 -->
+<div class="modal-bg" id="sms-log-content-modal">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><span>문자 내용</span><button class="modal-close" onclick="closeModal('sms-log-content-modal')">✕</button></div>
+    <div id="sms-log-content-detail" style="white-space:pre-wrap;word-break:break-word;font-size:14px;color:#333;line-height:1.5"></div>
+  </div>
+</div>
+
+<!-- 락커 모달 -->
+<!-- 업데이트 소식 팝업 -->
+<div class="modal-bg" id="patch-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="patch-modal-title"></span>
+      <button class="modal-close" onclick="closeModal('patch-modal')">✕</button>
+    </div>
+    <div id="patch-modal-body"></div>
+  </div>
+</div>
+
+<!-- 회원 상세에서 바로 락커 등록 -->
+<div class="modal-bg" id="member-locker-modal">
+  <div class="modal">
+    <div class="modal-title"><span>락커 등록 — <span id="ml-name"></span></span><button class="modal-close" onclick="closeModal('member-locker-modal')">✕</button></div>
+
+    <div class="section-box" id="ml-sync-ask" style="margin-bottom:16px;display:none">
+      <div style="font-size:13px;margin-bottom:4px;font-weight:600">회원권 기간과 연동할까요?</div>
+      <div id="ml-sync-range" style="font-size:12px;color:#888;margin-bottom:10px"></div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="action-btn" id="ml-sync-yes" onclick="setMemberLockerSync(true)">예, 회원권과 동일하게</button>
+        <button type="button" class="action-btn" id="ml-sync-no" onclick="setMemberLockerSync(false)">아니오, 직접 고를게요</button>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group"><label>락커 번호</label><select id="ml-locker"></select></div>
+      <div class="form-group"><label>기간</label>
+        <select id="ml-months" onchange="calcMemberLockerEnd()">
+          <option value="1">1개월</option>
+          <option value="3" selected>3개월</option>
+          <option value="6">6개월</option>
+          <option value="">기타 (직접 설정)</option>
+        </select>
+      </div>
+      <div class="form-group"><label>시작일</label><input type="date" id="ml-start" onchange="calcMemberLockerEnd()"></div>
+      <div class="form-group"><label>종료일</label><input type="date" id="ml-end"></div>
+      <div class="form-group"><label>금액</label><input type="number" id="ml-amount" placeholder="개월수 × 5,000"></div>
+      <div class="form-group"><label>결제 수단</label><select id="ml-payment"><option>카드</option><option>계좌이체</option><option>현금</option><option>서비스</option></select></div>
+    </div>
+
+    <div id="ml-error" style="margin-top:8px;font-size:12px;color:#c62828;min-height:16px"></div>
+    <button class="submit-btn" onclick="submitMemberLocker(this)">락커 등록</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="locker-modal">
+  <div class="modal">
+    <div class="modal-title"><span id="locker-modal-title">락커 관리</span><button class="modal-close" onclick="closeModal('locker-modal')">✕</button></div>
+    <div id="locker-modal-content"></div>
+  </div>
+</div>
+
+<!-- 운동복 연장 모달 -->
+<div class="modal-bg" id="uniform-extend-modal">
+  <div class="modal">
+    <div class="modal-title"><span id="uniform-extend-title">운동복 연장</span><button class="modal-close" onclick="closeModal('uniform-extend-modal')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>현재 만료일</label><div id="uniform-current-end" style="padding:9px 0;font-size:13px;font-weight:500"></div></div>
+      <div class="form-group"><label>연장 후 만료일</label><div id="uniform-extend-preview" style="padding:9px 0;font-size:13px;font-weight:500;color:#2e7d32"></div></div>
+      <div class="form-group"><label>연장 개월수</label>
+        <select id="ue-months" onchange="calcUniformExtendPreview()">
+          <option value="1">1개월</option>
+          <option value="3" selected>3개월</option>
+          <option value="6">6개월</option>
+          <option value="11">11개월</option>
+        </select>
+      </div>
+      <div class="form-group"><label>금액</label><input type="number" id="ue-amount" placeholder="15000"></div>
+      <div class="form-group"><label>결제 수단</label><select id="ue-payment"><option>카드</option><option>계좌이체</option><option>현금</option><option>서비스</option></select></div>
+    </div>
+    <button class="submit-btn" id="ue-submit-btn" style="margin-top:12px">연장 완료</button>
+  </div>
+</div>
+
+<!-- 운동복 등록 모달 -->
+<div class="modal-bg" id="uniform-modal">
+  <div class="modal">
+    <div class="modal-title"><span>운동복 대여 등록</span><button class="modal-close" onclick="closeModal('uniform-modal')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>회원명 *</label><input type="text" id="u-name" placeholder="홍길동"></div>
+      <div class="form-group"><label>시작일</label><input type="date" id="u-start"></div>
+      <div class="form-group"><label>개월수</label><select id="u-months"><option value="1">1개월</option><option value="3">3개월</option><option value="6">6개월</option><option value="11">11개월</option></select></div>
+      <div class="form-group"><label>금액</label><input type="number" id="u-amount" placeholder="15000"></div>
+      <div class="form-group"><label>결제 수단</label><select id="u-payment"><option>카드</option><option>계좌이체</option><option>서비스</option></select></div>
+    </div>
+    <button class="submit-btn" onclick="submitUniform()">등록 완료</button>
+  </div>
+</div>
+
+<!-- 이벤트 추가/수정 모달 -->
+<div class="modal-bg" id="event-modal">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><span id="event-modal-title">일정 추가</span><button class="modal-close" onclick="closeModal('event-modal')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>수업명 *</label><input type="text" id="ev-class" placeholder="예: CrossFit"></div>
+      <div class="form-group"><label>날짜 *</label><input type="date" id="ev-date"></div>
+      <div class="form-group"><label>시간 *</label><input type="time" id="ev-time"></div>
+      <div class="form-group form-full"><label>색상</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="ev-color-picker">
+          <span onclick="selectColor('#1a1a1a')" style="width:28px;height:28px;border-radius:6px;background:#1a1a1a;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectColor('#1565c0')" style="width:28px;height:28px;border-radius:6px;background:#1565c0;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectColor('#2e7d32')" style="width:28px;height:28px;border-radius:6px;background:#2e7d32;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectColor('#c62828')" style="width:28px;height:28px;border-radius:6px;background:#c62828;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectColor('#e65100')" style="width:28px;height:28px;border-radius:6px;background:#e65100;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectColor('#6a1b9a')" style="width:28px;height:28px;border-radius:6px;background:#6a1b9a;cursor:pointer;border:2px solid transparent"></span>
+        </div>
+        <input type="hidden" id="ev-color" value="#1a1a1a">
+      </div>
+      <div class="form-group form-full"><label>메모 (선택)</label><input type="text" id="ev-memo" placeholder=""></div>
+    </div>
+    <button class="submit-btn" id="ev-submit-btn" onclick="submitEvent()">추가 완료</button>
+    <button id="ev-delete-btn" onclick="deleteEvent()" style="display:none;width:100%;padding:12px;font-size:14px;font-weight:600;background:#fff;color:#c62828;border:1px solid #ffcdd2;border-radius:8px;cursor:pointer;margin-top:8px">🗑 이 일정 삭제</button>
+  </div>
+</div>
+
+<!-- 템플릿 추가/수정 모달 -->
+<div class="modal-bg" id="template-modal">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><span id="template-modal-title">템플릿 추가</span><button class="modal-close" onclick="closeModal('template-modal')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>수업명 *</label><input type="text" id="tm-class" placeholder="예: CrossFit"></div>
+      <div class="form-group"><label>요일 *</label>
+        <select id="tm-dow">
+          <option value="0">일요일</option>
+          <option value="1">월요일</option>
+          <option value="2">화요일</option>
+          <option value="3">수요일</option>
+          <option value="4">목요일</option>
+          <option value="5">금요일</option>
+          <option value="6">토요일</option>
+        </select>
+      </div>
+      <div class="form-group"><label>시간 *</label><input type="time" id="tm-time"></div>
+      <div class="form-group form-full"><label>색상</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="tm-color-picker">
+          <span onclick="selectTmColor('#1a1a1a')" style="width:28px;height:28px;border-radius:6px;background:#1a1a1a;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectTmColor('#1565c0')" style="width:28px;height:28px;border-radius:6px;background:#1565c0;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectTmColor('#2e7d32')" style="width:28px;height:28px;border-radius:6px;background:#2e7d32;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectTmColor('#c62828')" style="width:28px;height:28px;border-radius:6px;background:#c62828;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectTmColor('#e65100')" style="width:28px;height:28px;border-radius:6px;background:#e65100;cursor:pointer;border:2px solid transparent"></span>
+          <span onclick="selectTmColor('#6a1b9a')" style="width:28px;height:28px;border-radius:6px;background:#6a1b9a;cursor:pointer;border:2px solid transparent"></span>
+        </div>
+        <input type="hidden" id="tm-color" value="#1a1a1a">
+      </div>
+    </div>
+    <button class="submit-btn" id="tm-submit-btn" onclick="submitTemplate()">추가 완료</button>
+  </div>
+</div>
+
+<!-- 템플릿 일괄 추가 모달 -->
+<div class="modal-bg" id="bulk-template-modal">
+  <div class="modal" style="width:600px">
+    <div class="modal-title"><span>⚡ 반복 템플릿 일괄 추가</span><button class="modal-close" onclick="closeModal('bulk-template-modal')">✕</button></div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:500">수업명 *</div>
+      <input type="text" id="bulk-class" placeholder="예: CrossFit" style="width:100%;padding:9px 12px;border:1px solid #e5e5e5;border-radius:8px;font-size:13px;outline:none">
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:500">색상</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="bulk-color-picker">
+        <span onclick="selectBulkColor('#1a1a1a')" style="width:28px;height:28px;border-radius:6px;background:#1a1a1a;cursor:pointer"></span>
+        <span onclick="selectBulkColor('#1565c0')" style="width:28px;height:28px;border-radius:6px;background:#1565c0;cursor:pointer"></span>
+        <span onclick="selectBulkColor('#2e7d32')" style="width:28px;height:28px;border-radius:6px;background:#2e7d32;cursor:pointer"></span>
+        <span onclick="selectBulkColor('#c62828')" style="width:28px;height:28px;border-radius:6px;background:#c62828;cursor:pointer"></span>
+        <span onclick="selectBulkColor('#e65100')" style="width:28px;height:28px;border-radius:6px;background:#e65100;cursor:pointer"></span>
+        <span onclick="selectBulkColor('#6a1b9a')" style="width:28px;height:28px;border-radius:6px;background:#6a1b9a;cursor:pointer"></span>
+      </div>
+      <input type="hidden" id="bulk-color" value="#1a1a1a">
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:#888;margin-bottom:10px;font-weight:500">요일 × 시간 선택 (체크 = 해당 시간에 수업 있음)</div>
+      <div style="overflow-x:auto">
+        <table style="border-collapse:collapse;font-size:12px;width:100%">
+          <thead>
+            <tr>
+              <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e5e5e5;color:#888;font-weight:500;min-width:60px">시간</th>
+              <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e5e5e5;color:#c62828;font-weight:600;text-align:center">일</th>
+              <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e5e5e5;color:#333;font-weight:600;text-align:center">월</th>
+              <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e5e5e5;color:#333;font-weight:600;text-align:center">화</th>
+              <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e5e5e5;color:#333;font-weight:600;text-align:center">수</th>
+              <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e5e5e5;color:#333;font-weight:600;text-align:center">목</th>
+              <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e5e5e5;color:#333;font-weight:600;text-align:center">금</th>
+              <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e5e5e5;color:#1565c0;font-weight:600;text-align:center">토</th>
+            </tr>
+          </thead>
+          <tbody id="bulk-matrix-body"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="action-btn" onclick="bulkAddTime()">+ 시간 추가</button>
+        <input type="time" id="bulk-new-time" style="padding:5px 8px;border:1px solid #e5e5e5;border-radius:6px;font-size:12px">
+        <button class="action-btn" onclick="bulkSelectRow()" style="margin-left:auto">행 전체 선택</button>
+        <button class="action-btn" onclick="bulkClearAll()">전체 해제</button>
+      </div>
+    </div>
+
+    <div id="bulk-preview" style="font-size:12px;color:#888;margin-bottom:12px;min-height:18px"></div>
+    <button class="submit-btn" onclick="submitBulkTemplates()">일괄 추가</button>
+  </div>
+</div>
+
+
+<script src="/js/utils.js"></script>
+<script src="/js/photo-capture.js"></script>
+<script src="/js/admin-core.js"></script>
+<script src="/js/admin-facility.js"></script>
+<script src="/js/admin-pricing.js"></script>
+<script src="/js/admin-members.js"></script>
+<script src="/js/admin-messages.js"></script>
+<script src="/js/admin-holding.js"></script>
+<script src="/js/admin-counts.js"></script>
+<script src="/js/admin-contracts.js"></script>
+<script src="/js/admin-applications.js"></script>
+<script src="/js/admin-schedule.js"></script>
+<script src="/js/admin-calendar.js"></script>
+<script src="/js/admin-wod.js"></script>
+<script src="/js/admin-sms.js"></script>
+<script src="/js/admin-ledger.js"></script>
+<script src="/js/admin-patchnotes.js"></script>
+<script src="/js/admin-init.js"></script>
+<!-- 공지 캘린더 이벤트 모달 -->
+<div class="modal-bg" id="cal-event-modal">
+  <div class="modal" style="width:420px">
+    <div class="modal-title"><span id="cal-event-modal-title">일정 추가</span><button class="modal-close" onclick="closeModal('cal-event-modal')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>제목 *</label><input type="text" id="cal-ev-title"></div>
+      <div class="form-group"><label>날짜 *</label><input type="date" id="cal-ev-date"></div>
+      <div class="form-group"><label>종류</label>
+        <select id="cal-ev-type" onchange="updateCalEvColor()">
+          <option value="휴관일">휴관일</option>
+          <option value="오픈짐">오픈짐</option>
+          <option value="이벤트">이벤트</option>
+        </select>
+      </div>
+      <div class="form-group form-full"><label>메모</label><input type="text" id="cal-ev-memo"></div>
+    </div>
+    <input type="hidden" id="cal-ev-color" value="#c62828">
+    <button class="submit-btn" id="cal-ev-submit-btn" onclick="submitCalEvent()">추가 완료</button>
+    <button id="cal-ev-delete-btn" onclick="deleteCalEvent()" style="display:none;width:100%;padding:12px;font-size:14px;font-weight:600;background:#fff;color:#c62828;border:1px solid #ffcdd2;border-radius:8px;cursor:pointer;margin-top:8px">🗑 이 일정 삭제</button>
+  </div>
+</div>
+
+<%- include('partials/footer', { theme: 'light' }) %>
+
+<% } %>
+</body>
+</html>
