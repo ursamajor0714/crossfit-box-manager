@@ -192,7 +192,7 @@ router.get('/api/revenue/export', requireAdmin, async (req, res) => {
 
   const ExcelJS = require('exceljs');
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'CrossFit Grove';
+  wb.creator = 'CrossFit Box';
   wb.created = new Date();
 
   const WON = '#,##0';

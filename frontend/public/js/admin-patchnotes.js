@@ -362,7 +362,7 @@ const PATCH_NOTES = [
   {
     version: '1.0.0',
     date: '20260703',
-    title: 'CrossFit Grove 관리 시스템 최초 배포',
+    title: 'CrossFit Box 관리 시스템 최초 배포',
     scale: '대격변',
     author: '연재의 대학원생 친구',
     summary: '수기로 관리하던 회원 장부를 프로그램으로 옮긴 첫 번째 버전입니다. 지금 쓰고 있는 모든 기능의 출발점입니다.',

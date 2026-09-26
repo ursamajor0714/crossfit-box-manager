@@ -1,10 +1,11 @@
-# CrossFit Grove — 박스 운영 관리 시스템
+# CrossFit Box — 박스 운영 관리 시스템
 
 크로스핏 박스 한 곳에서 **실제로 매일 쓰고 있는** 관리 도구입니다.
 회원 등록부터 계약서 작성, 락커 배정, 수업 시간표, 매출·가계부까지 운영에 필요한 것을 한 화면에서 처리합니다.
 
 > 이 저장소는 **공개용 사본**입니다.
 > 운영 DB 접속 정보와 배포 설정은 제거했고, 회원 데이터는 전부 지어낸 목업으로 대체했습니다.
+> 실제 상호·로고·사업자 정보도 일반 명칭(CrossFit Box)으로 바꿨습니다.
 > 구조와 코드만 볼 수 있습니다.
 
 ## 스택
@@ -56,7 +57,7 @@ docs/              작업 기록 (기능별 결정 사항과 검사 결과)
 Postgres 하나만 있으면 됩니다.
 
 ```bash
-docker run -d --name grove-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=grove -p 55432:5432 postgres:16-alpine
+docker run -d --name cfbox-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=cfbox -p 55432:5432 postgres:16-alpine
 
 cp .env.example .env
 npm install
@@ -125,3 +126,4 @@ npm start
 - 배포 설정 (`render.yaml`) 및 DB 마이그레이션 스크립트
 - 사업자 정보·대표자 실명·연락처 → 예시 값으로 대체
 - 실제 회원 데이터 → `seed-demo.js` 의 목업으로 대체
+- **실제 상호·로고** → 화면 문구·앱 아이콘·가격표 이미지를 일반 명칭(CrossFit Box)으로 교체

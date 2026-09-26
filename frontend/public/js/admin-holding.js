@@ -1,6 +1,6 @@
 // ============================================================
 // 홀딩 / 특별 연장 관리
-// CrossFit Grove 관리자 - admin-members.js에서 분리된 스크립트
+// CrossFit Box 관리자 - admin-members.js에서 분리된 스크립트
 // ============================================================
 
 async function searchHoldMember() {

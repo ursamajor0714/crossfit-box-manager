@@ -1,5 +1,5 @@
 {
-  "name": "crossfit-grove",
+  "name": "crossfit-box-manager",
   "version": "1.0.0",
   "main": "backend/server.js",
   "scripts": {

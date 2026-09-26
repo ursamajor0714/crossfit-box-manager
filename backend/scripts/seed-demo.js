@@ -512,17 +512,17 @@ async function seedMoney() {
 
 const SMS_TEMPLATES = [
   { category: '만료안내', title: '회원권 만료 임박', is_default: true,
-    content: '[크로스핏 그로브] #{이름}님, 회원권이 #{만료일}에 만료됩니다. 재등록 문의는 답장 주세요.' },
+    content: '[크로스핏 박스] #{이름}님, 회원권이 #{만료일}에 만료됩니다. 재등록 문의는 답장 주세요.' },
   { category: '만료안내', title: '만료 후 재등록 권유', is_default: false,
-    content: '[크로스핏 그로브] #{이름}님, 다시 뵙고 싶습니다. 재등록 시 첫 달 할인 혜택이 있습니다.' },
+    content: '[크로스핏 박스] #{이름}님, 다시 뵙고 싶습니다. 재등록 시 첫 달 할인 혜택이 있습니다.' },
   { category: '공지', title: '휴관 안내', is_default: true,
-    content: '[크로스핏 그로브] #{날짜} 휴관합니다. 착오 없으시길 바랍니다.' },
+    content: '[크로스핏 박스] #{날짜} 휴관합니다. 착오 없으시길 바랍니다.' },
   { category: '공지', title: '이벤트 안내', is_default: false,
-    content: '[크로스핏 그로브] 내부 대회 참가 신청을 받습니다. 데스크로 문의 주세요.' },
+    content: '[크로스핏 박스] 내부 대회 참가 신청을 받습니다. 데스크로 문의 주세요.' },
   { category: '체험', title: '체험 예약 확인', is_default: true,
-    content: '[크로스핏 그로브] #{이름}님, #{날짜} 체험 수업이 예약되었습니다. 편한 운동복으로 오세요.' },
+    content: '[크로스핏 박스] #{이름}님, #{날짜} 체험 수업이 예약되었습니다. 편한 운동복으로 오세요.' },
   { category: '생일', title: '생일 축하', is_default: true,
-    content: '[크로스핏 그로브] #{이름}님, 생일 축하드립니다! 데스크에서 작은 선물 받아가세요.' },
+    content: '[크로스핏 박스] #{이름}님, 생일 축하드립니다! 데스크에서 작은 선물 받아가세요.' },
 ];
 
 async function seedSms(members) {

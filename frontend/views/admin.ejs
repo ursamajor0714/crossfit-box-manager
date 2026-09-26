@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrossFit Grove</title>
+<title>CrossFit Box</title>
 <link rel="stylesheet" href="/css/common.css">
 <% if (isAuthenticated) { %>
 <link rel="stylesheet" href="/css/admin.css">
@@ -15,7 +15,7 @@
 <!-- 관리자 로그인 게이트 -->
 <div id="admin-gate" style="position:fixed;inset:0;background:#0d0d0d;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:-apple-system,sans-serif">
   <div style="text-align:center;width:340px;max-width:90vw">
-    <div style="font-family:sans-serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:4px">CrossFit Grove</div>
+    <div style="font-family:sans-serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:4px">CrossFit Box</div>
     <div style="color:#888;font-size:13px;margin-bottom:28px">관리자 로그인</div>
     <input type="password" id="admin-pw" placeholder="비밀번호" style="width:100%;padding:13px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:15px;outline:none;margin-bottom:12px" onkeydown="if(event.key==='Enter')adminLogin()">
     <button onclick="adminLogin()" style="width:100%;padding:13px;background:#c5ff2e;color:#0d0d0d;border:none;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer">로그인</button>
@@ -48,7 +48,7 @@ async function adminLogin() {
 
 <div class="header">
   <div>
-    <div class="header-title">CrossFit Grove</div>
+    <div class="header-title">CrossFit Box</div>
     <div class="header-sub" id="header-who">관리자 대시보드</div>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
@@ -923,10 +923,10 @@ async function adminLogin() {
   <div class="modal" style="width:400px">
     <div class="modal-title"><span>요금제 추가</span><button class="modal-close" onclick="closeModal('pricing-modal')">✕</button></div>
     <div class="form-grid">
-      <div class="form-group"><label>요금제명</label><input type="text" id="pm-plan" placeholder="예: Grove 신규"></div>
+      <div class="form-group"><label>요금제명</label><input type="text" id="pm-plan" placeholder="예: 신규 프로모션"></div>
       <div class="form-group"><label>기간 (개월)</label><input type="number" id="pm-period" placeholder="3" min="1"></div>
       <div class="form-group form-full"><label>금액</label><input type="number" id="pm-amount" placeholder="450000"></div>
-      <div class="form-group form-full"><label>레이블 (선택)</label><input type="text" id="pm-label" placeholder="예: Grove 신규 3개월"></div>
+      <div class="form-group form-full"><label>레이블 (선택)</label><input type="text" id="pm-label" placeholder="예: 신규 프로모션 3개월"></div>
     </div>
     <button class="submit-btn" onclick="submitAddPricing()">추가 완료</button>
   </div>

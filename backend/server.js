@@ -100,7 +100,7 @@ app.use((err, req, res, next) => {
 
 db.ready
   .then(() => {
-    app.listen(PORT, () => console.log(`✅ CrossFit Grove 서버 실행 중: http://localhost:${PORT}`));
+    app.listen(PORT, () => console.log(`✅ CrossFit Box 서버 실행 중: http://localhost:${PORT}`));
   })
   .catch((err) => {
     console.error('DB 초기화 실패:', err);

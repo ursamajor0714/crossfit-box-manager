@@ -22,7 +22,7 @@ async function sendSms({ receiver, msg, title }) {
 
   const type = smsType(msg);
   // LMS는 제목을 안 넘기면 알리고가 본문 앞부분을 제목으로 자동 채워 넣어 인사말이 중복 표시되는 문제가 있어 기본값 지정
-  const finalTitle = title || (type === 'LMS' ? 'CrossFit Grove' : '');
+  const finalTitle = title || (type === 'LMS' ? 'CrossFit Box' : '');
 
   const body = new URLSearchParams({
     key: apiKey,

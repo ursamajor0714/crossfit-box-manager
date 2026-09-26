@@ -1,6 +1,6 @@
 // ============================================================
 // 공지/휴관 캘린더 (calendar_events)
-// CrossFit Grove 관리자 - admin-schedule.js에서 분리된 스크립트
+// CrossFit Box 관리자 - admin-schedule.js에서 분리된 스크립트
 // ============================================================
 
 let adminCalYear=new Date().getFullYear(), adminCalMonth=new Date().getMonth()+1, adminCalEvents=[], editingCalEventId=null;
